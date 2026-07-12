@@ -46,7 +46,7 @@ A small Auckland roastery supplies three cafes and plans exspand in nearest futu
 - Packing is guided: one order = one box, tap each line as it goes in, **"Box ready" only activates at 100%** — an incomplete box cannot ship. The screen auto-advances to the next box.
 - A late add-on order **merges into an existing not-yet-roasted batch** — one drum run instead of two. If roasting has started, the system respects physics and creates a separate batch.
 - **Unfinished work from previous days cannot be forgotten**: it appears at the top of the daily worklist with a ⚠ date badge until closed.
-
+![Cafe orders for Roastery](docs/5_CafeRoaster_screen1_ordersIntake_and_status.png)
 
 
 ---
