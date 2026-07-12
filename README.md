@@ -39,7 +39,7 @@ A small Auckland roastery supplies three cafes and plans exspand in nearest futu
 
 - Cafe managers order from **their own app**  — and see their order history and live status.
 
-![Cafe managers order](docs/1_CafeOrder__screen1.png)![Cafe managers order](docs/2_CafeOrder_screen2_review.png)![Cafe managers order](docs/1_CafeOrder__screen1.png)![Cafe managers order](docs/1_CafeOrder__screen1.png)![Cafe managers order](docs/1_CafeOrder__screen1.png)
+![Cafe managers order](docs/1_CafeOrder__screen1.png)![Cafe managers order](docs/2_CafeOrder_screen2_review.png)![Cafe managers order](docs/3_CafeOrder_screen3_orderPl.png)![Cafe managers order](docs/4_CafeOrder_screen4_ordersHistory_and_status.png)
 
 - At **16:00 daily** (or earlier, on one tap by the roaster) the system aggregates all orders, groups them into **roasting batches** by blend + roast level, computes green-bean weight per origin shrinkage, and generates the **grind & packaging plan** (bags per grind/size).
 - The roaster works from a single dashboard: who ordered, what to roast (in kg of green beans), how to grind and pack it. One tap marks a batch roasted.
