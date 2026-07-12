@@ -44,7 +44,7 @@ A small Auckland roastery supplies three cafes and plans exspand in nearest futu
 - A late add-on order **merges into an existing not-yet-roasted batch** — one drum run instead of two. If roasting has started, the system respects physics and creates a separate batch.
 - **Unfinished work from previous days cannot be forgotten**: it appears at the top of the daily worklist with a ⚠ date badge until closed.
 
-<!-- SCREENSHOT: docs/01-home-tails.png — operator dashboard with unfinished tails on top -->
+(docs/1_CafeOrder__screen1.png)
 
 ---
 
