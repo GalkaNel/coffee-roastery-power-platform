@@ -98,6 +98,8 @@ Row-level isolation is enforced by security roles and Owner Teams, not by app-si
 
 ## Automation
 
+![Autom](docs/Automation.png)
+
 ```
 Daily Production Run 16:00  (Recurrence, Auckland TZ) ──┐
                                                         ├──► Generate Production Run (child)
