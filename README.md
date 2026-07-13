@@ -37,16 +37,15 @@ A small Auckland roastery supplies three cafes and plans exspand in nearest futu
 
 ## What the system does
 
+![Cafe managers order](docs/Concept_visuals1.png)
+
 - Cafe managers order from **their own app**  — and see their order history and live status.
-
-![Cafe managers order](docs/1_CafeOrder__screen1.png)![Cafe managers order](docs/2_CafeOrder_screen2_review.png)![Cafe managers order](docs/3_CafeOrder_screen3_orderPl.png)![Cafe managers order](docs/4_CafeOrder_screen4_ordersHistory_and_status.png)
-
 - At **16:00 daily** (or earlier, on one tap by the roaster) the system aggregates all orders, groups them into **roasting batches** by blend + roast level, computes green-bean weight per origin shrinkage, and generates the **grind & packaging plan** (bags per grind/size).
 - The roaster works from a single dashboard: who ordered, what to roast (in kg of green beans), how to grind and pack it. One tap marks a batch roasted.
 - Packing is guided: one order = one box, tap each line as it goes in, **"Box ready" only activates at 100%** — an incomplete box cannot ship. The screen auto-advances to the next box.
 - A late add-on order **merges into an existing not-yet-roasted batch** — one drum run instead of two. If roasting has started, the system respects physics and creates a separate batch.
 - **Unfinished work from previous days cannot be forgotten**: it appears at the top of the daily worklist with a ⚠ date badge until closed.
-![Cafe orders for Roastery](docs/5_CafeRoaster_screen1_ordersIntake_and_status.png)
+
 
 
 ---
@@ -194,7 +193,7 @@ For each blend|roast key:
 - **My Orders** — master-detail history with live status (self-service status visibility; this is why a status chatbot was rejected as redundant).
 - Live clock beside the cutoff rule, with a state-aware note that switches after 16:00 from *rule* to *fact about this order*.
 
-<!-- SCREENSHOT: docs/04-order-matrix.png -->
+![Cafe managers order](docs/1_CafeOrder__screen1.png)![Cafe managers order](docs/2_CafeOrder_screen2_review.png)![Cafe managers order](docs/3_CafeOrder_screen3_orderPl.png)![Cafe managers order](docs/4_CafeOrder_screen4_ordersHistory_and_status.png)
 
 ### Packing Station (canvas — roaster)
 
@@ -205,7 +204,7 @@ For each blend|roast key:
 - **Packing screen**: queue = orders *In Production* (date-independent); one order per screen; quantity-first line layout ("3 × Ethiopia…"); **tap-per-line** writes Pack Status; progress "Packed X of Y"; **Box ready** appears only at 100%, closes the order and auto-advances; finale "All boxes packed ☕".
 - **Timer-based polling** keeps the always-open tablet dashboard fresh (canvas has no server push).
 
-<!-- SCREENSHOT: docs/05-packing.png -->
+![Cafe orders for Roastery](docs/5_CafeRoaster_screen1_ordersIntake_and_status.png)
 
 ### Roastery Ops (model-driven — roaster + office)
 
