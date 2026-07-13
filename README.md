@@ -37,7 +37,7 @@ A small Auckland roastery supplies three own cafes and plans exspand in the near
 
 ## What the system does
 
-![Cafe managers order](docs/Concept_visuals1.png)
+![Cafe managers order](docs/Concept_visuals2.png)
 
 - Cafe managers order from **their own app**  — and see their order history and live status.
 - At **16:00 daily** (or earlier, on one tap by the roaster) the system aggregates all orders, groups them into **roasting batches** by blend + roast level, computes green-bean weight per origin shrinkage, and generates the **grind & packaging plan** (bags per grind/size).
