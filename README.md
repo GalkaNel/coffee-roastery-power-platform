@@ -234,6 +234,13 @@ Documented as adaptations, not hacks — each with a production path.
 - **Notification channels** — the system surfaces exceptions in the operator's worklist rather than pushing alerts; Teams/email would be added in production.
 
 ---
+### Domain simplifications (deliberate, with a stated next iteration)
+
+- **Shrinkage is stored per coffee, not per coffee × roast level.** In reality, weight loss depends on both the bean's moisture content *and* the roast degree — the same origin roasted dark loses more than roasted light. *Next iteration: move the shrinkage percentage onto the blend × roast-level combination — a data-model change, not an architectural one.*
+- **Machine capacity is not modelled.** A production task of 35 kg of green is not one machine load — a small roastery's machine typically takes 5–15 kg at a time, so the task becomes several sequential loads. The system plans *what and how much*, not *how many loads*. *Next iteration: add machine capacity as reference data and split tasks into loads automatically, which also unlocks realistic time estimates for the roasting day.*
+- **Terminology note:** a `Roast Batch` record is a **production task** (one coffee × roast level for the day), not a single physical machine load. Merging tasks saves a **changeover** — profile setup, weighing, dialling in — which is the production-planning value the automation delivers.
+
+---
 
 ## Licensing considerations
 
