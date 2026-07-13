@@ -61,7 +61,7 @@ A small Auckland roastery supplies three own cafes and plans exspand in the near
 
 ## Data model
 
-![Data model](docs/Data model.png)
+![Architecture](docs/Data_model.png)
 
 
 | Decision | Rationale |
