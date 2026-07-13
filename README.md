@@ -27,13 +27,19 @@ Built end-to-end as a portfolio project: data model, security, automation, three
 
 ## The business problem
 ![The business problem](docs/Concept_issue.png)
-A small Auckland roastery supplies three own cafes and plans exspand in the nearest future. Before the system:
+A small Auckland coffee company roasts its own beans and runs three of its own cafes — the cafe managers are staff, not external customers. The owners plan to open up to seven sites over five years. Before the system:
 
 - Orders arrived by **phone and text** — easy to mishear, easy to lose.
 - The roaster manually totalled all orders to decide how much to roast, converting roasted weight back to **green bean weight** (beans lose ~14–18% during roasting, and the rate differs per origin).
 - Cafes phoned to ask "is my order in?", interrupting production.
 - A late add-on order meant either a **second drum run** (expensive) or manual recalculation of an existing plan.
 - If a day went wrong (roaster sick), unfinished work **silently disappeared** — no one tracked leftovers.
+
+## The domain math
+
+Green coffee loses 11–24% of its weight during roasting (moisture, chaff, off-gassing); lighter roasts lose less, darker more, and specialty roasters typically sit in the 11–16% band. So the roaster cannot weigh out what was ordered: to deliver 30 kg roasted at 16% loss, they must load 30 ÷ (1 − 0.16) = 35.7 kg of green. This backwards calculation — how much green do I need for today's orders — is a real daily manual task, and it is what the automation replaces.
+
+(Roast-logging software also computes weight loss — but after the roast, from actual green-in/roasted-out weights, for quality control. Planning the green load before the roast, against a day of multi-site orders, is a different job.)
 
 ## What the system does
 
