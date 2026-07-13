@@ -100,11 +100,6 @@ Row-level isolation is enforced by security roles and Owner Teams, not by app-si
 
 ![Autom](docs/Automation.png)
 
-```
-Daily Production Run 16:00  (Recurrence, Auckland TZ) ──┐
-                                                        ├──► Generate Production Run (child)
-Build Plan (App)  (Power Apps V2 trigger, button)  ─────┘         └─ Respond: "Plan built …"
-```
 
 All logic lives in the child flow; the two parents are thin entry points — one implementation, multiple doors. A third door (e.g. an agent) could be added without touching logic.
 
