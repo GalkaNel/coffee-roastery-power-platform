@@ -176,7 +176,7 @@ For each blend|roast key:
 - **Packing screen**: queue = orders *In Production* (date-independent); one order per screen; quantity-first line layout ("3 × Ethiopia…"); **tap-per-line** writes Pack Status; progress "Packed X of Y"; **Box ready** appears only at 100%, closes the order and auto-advances; finale "All boxes packed ☕".
 - **Timer-based polling** keeps the always-open tablet dashboard fresh (canvas has no server push).
 
-![Cafe orders for Roastery](docs/5_CafeRoaster_screen1_ordersIntake_and_status.png)
+![Cafe orders for Roastery](docs/Roastery.png)
 
 ### Roastery Ops (model-driven — roaster + office)
 
