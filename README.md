@@ -26,7 +26,7 @@ Built end-to-end as a portfolio project: data model, security, automation, three
 ---
 
 ## The business problem
-
+![The business problem](docs/Concept_issue.png)
 A small Auckland roastery supplies three own cafes and plans exspand in the nearest future. Before the system:
 
 - Orders arrived by **phone and text** — easy to mishear, easy to lose.
