@@ -182,6 +182,7 @@ For each blend|roast key:
 - **Packing screen**: queue = orders *In Production* (date-independent); one order per screen; quantity-first line layout ("3 × Ethiopia…"); **tap-per-line** writes Pack Status; progress "Packed X of Y"; **Box ready** appears only at 100%, closes the order and auto-advances; finale "All boxes packed ☕".
 - **Timer-based polling** keeps the always-open tablet dashboard fresh (canvas has no server push).
 
+![Cafe orders for Roastery](docs/RoasterApp.png)
 ![Cafe orders for Roastery](docs/Roastery.png)
 
 ### Roastery Ops (model-driven — roaster + office)
@@ -193,7 +194,8 @@ What model-driven contributes, and why it earns its place:
 - **Charts**: *Ordered Kg by Blend*, *Bags by Package Size* — click-to-filter. (Demo data demonstrates the system's **capability to measure**, not market conclusions.)
 - **Customised main form** on Roast Batch + a **Business Rule**: `IF Batch Status = Done THEN Ordered Kg is Business Required` — declarative form logic, no code.
 
-<!-- SCREENSHOT: docs/06-model-driven-chart.png -->
+![Cafe orders for Roastery](docs/modelDr.png)
+
 
 ---
 
