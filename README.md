@@ -2,7 +2,7 @@
 
 **Microsoft Power Platform** · Dataverse · Canvas Apps · Model-driven App · Power Automate · Power Fx
 
-A complete order-to-production system for a small coffee roastery supplying it's own cafes : cafe managers place stock orders, the system builds the daily roasting and packaging plan automatically (including green-bean shrinkage math and cross-cafe aggregation), and the roaster works from a single operator dashboard through to packed boxes.
+A complete order-to-production system for a small coffee roastery supplying three cafes: cafe managers place stock orders, the system builds the daily roasting and packaging plan automatically (including green-bean shrinkage math and cross-cafe aggregation), and the roaster works from a single operator dashboard through to packed boxes.
 
 Built end-to-end as a portfolio project: data model, security, automation, three applications, and the design decisions behind them.
 
@@ -27,29 +27,33 @@ Built end-to-end as a portfolio project: data model, security, automation, three
 
 ## The business problem
 ![The business problem](docs/Concept_issue.png)
-A small Auckland coffee company roasts its own beans and runs three of its own cafes — the cafe managers are staff, not external customers. The owners plan to open up to seven sites over five years. Before the system:
+A small Auckland coffee company roasts its own beans and runs **three of its own cafes** — the cafe managers are staff, not external customers. The owners plan to open up to **seven sites over five years**. Before the system:
 
-- Orders arrived by **phone, e-mails and text** — easy to mishear, easy to lose.
+- **Orders were scattered** across email, a group chat and a spreadsheet nobody maintained — read twice, or not at all.
 - The roaster manually totalled all orders to decide how much to roast, converting roasted weight back to **green bean weight** (beans lose ~14–18% during roasting, and the rate differs per origin).
-- Cafes phoned to ask "is my order in?", interrupting production.
-- A late add-on order meant either a **second drum run** (expensive) or manual recalculation of an existing plan.
-- If a day went wrong (roaster sick), unfinished work **silently disappeared** — no one tracked leftovers.
+- **No single source of truth**: orders arrived by email, group chat, and a shared spreadsheet nobody kept current — no reliable answer to "what exactly are we roasting today?"
+- A late add-on order meant either a **second production setup** for the same coffee — reset, re-profile, re-weigh — or a manual recalculation of an existing plan.
+- If a day went wrong (illness, equipment, a rush), unfinished work **silently disappeared** — the shortfall surfaced only when a cafe ran out, too late to roast, rest and deliver inside the freshness window.
+- 
+### Why the business runs on short cycles
+
+Roasted coffee has a **peak-freshness window** — it is not "fresher is always better". Beans degas CO₂ for the first few days and brew unpredictably; most coffees peak around **days 5–14**; past ~30 days they oxidise and lose complexity. So the roastery cannot roast a month of stock in advance, and cannot roast tonight for tomorrow morning. It must work in **short repeating cycles**, with cafes ordering **frequently in small quantities**. That is a daily coordination load — and before this system, it was carried by hand.
 
 ## The domain math
 
-Green coffee loses 11–24% of its weight during roasting (moisture, chaff, off-gassing); lighter roasts lose less, darker more, and specialty roasters typically sit in the 11–16% band. So the roaster cannot weigh out what was ordered: to deliver 30 kg roasted at 16% loss, they must load 30 ÷ (1 − 0.16) = 35.7 kg of green. This backwards calculation — how much green do I need for today's orders — is a real daily manual task, and it is what the automation replaces.
+Green coffee loses **11–24% of its weight** during roasting (moisture, chaff, off-gassing); lighter roasts lose less, darker more, and specialty roasters typically sit in the **11–16%** band. So the roaster cannot weigh out what was ordered: to deliver 30 kg roasted at 16% loss, they must load `30 ÷ (1 − 0.16) = 35.7 kg` of green. This backwards calculation — *how much green do I need for today's orders* — is a real daily manual task, and it is what the automation replaces.
 
-(Roast-logging software also computes weight loss — but after the roast, from actual green-in/roasted-out weights, for quality control. Planning the green load before the roast, against a day of multi-site orders, is a different job.)
+*(Roast-logging software also computes weight loss — but* ***after*** *the roast, from actual green-in/roasted-out weights, for quality control. Planning the green load* ***before*** *the roast, against a day of multi-site orders, is a different job.)*
 
 ## What the system does
 
 ![Cafe managers order](docs/Concept_visuals2.png)
 
-- Cafe managers order from **their own app**  — and see their order history and live status.
+- Cafe managers order from **their own app** — a product grid on tablet/phone — and see their order history and live status.
 - At **16:00 daily** (or earlier, on one tap by the roaster) the system aggregates all orders, groups them into **roasting batches** by blend + roast level, computes green-bean weight per origin shrinkage, and generates the **grind & packaging plan** (bags per grind/size).
 - The roaster works from a single dashboard: who ordered, what to roast (in kg of green beans), how to grind and pack it. One tap marks a batch roasted.
 - Packing is guided: one order = one box, tap each line as it goes in, **"Box ready" only activates at 100%** — an incomplete box cannot ship. The screen auto-advances to the next box.
-- A late add-on order **merges into an existing not-yet-roasted batch** — one drum run instead of two. If roasting has started, the system respects physics and creates a separate batch.
+- A late add-on order **merges into a production task that has not been run yet** — one setup instead of two. If the task has already started, the system respects physics and plans a separate one.
 - **Unfinished work from previous days cannot be forgotten**: it appears at the top of the daily worklist with a ⚠ date badge until closed.
 
 
