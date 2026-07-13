@@ -165,7 +165,7 @@ For each blend|roast key:
 - **My Orders** — master-detail history with live status (self-service status visibility; this is why a status chatbot was rejected as redundant).
 - Live clock beside the cutoff rule, with a state-aware note that switches after 16:00 from *rule* to *fact about this order*.
 
-![Cafe managers order](docs/1_CafeOrder__screen1.png)![Cafe managers order](docs/2_CafeOrder_screen2_review.png)![Cafe managers order](docs/3_CafeOrder_screen3_orderPl.png)![Cafe managers order](docs/4_CafeOrder_screen4_ordersHistory_and_status.png)
+![Cafe managers order](docs/OrderSteps.png)
 
 ### Packing Station (canvas — roaster)
 
