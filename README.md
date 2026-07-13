@@ -2,7 +2,7 @@
 
 **Microsoft Power Platform** · Dataverse · Canvas Apps · Model-driven App · Power Automate · Power Fx
 
-A complete order-to-production system for a small coffee roastery supplying three cafes: cafe managers place stock orders, the system builds the daily roasting and packaging plan automatically (including green-bean shrinkage math and cross-cafe aggregation), and the roaster works from a single operator dashboard through to packed boxes.
+A complete order-to-production system for a small coffee roastery supplying it's own cafes : cafe managers place stock orders, the system builds the daily roasting and packaging plan automatically (including green-bean shrinkage math and cross-cafe aggregation), and the roaster works from a single operator dashboard through to packed boxes.
 
 Built end-to-end as a portfolio project: data model, security, automation, three applications, and the design decisions behind them.
 
@@ -27,7 +27,7 @@ Built end-to-end as a portfolio project: data model, security, automation, three
 
 ## The business problem
 
-A small Auckland roastery supplies three cafes and plans exspand in nearest future. Before the system:
+A small Auckland roastery supplies three own cafes and plans exspand in the nearest future. Before the system:
 
 - Orders arrived by **phone and text** — easy to mishear, easy to lose.
 - The roaster manually totalled all orders to decide how much to roast, converting roasted weight back to **green bean weight** (beans lose ~14–18% during roasting, and the rate differs per origin).
