@@ -171,7 +171,7 @@ For each blend|roast key:
 - **`createdon desc`, row count 1** in the packaging lookup — tasks always land on the newest live batch of the key (just created or just merged). This one-line sort also fixed a real defect: with two same-key batches in a day, tasks previously attached to the wrong one.
 - **Merge by Update, never delete-and-recreate** — recreation would cascade-delete existing Packaging Tasks (Parental).
 
-<!-- SCREENSHOT: docs/03-flow-merge.png — Find Planned Batch → Condition → Update / Add -->
+![Cafe orders Flow merge](docs/flow-merge2.png)
 
 ### Idempotency, layered honestly
 
