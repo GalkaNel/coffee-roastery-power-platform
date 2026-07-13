@@ -29,7 +29,7 @@ Built end-to-end as a portfolio project: data model, security, automation, three
 ![The business problem](docs/Concept_issue.png)
 A small Auckland coffee company roasts its own beans and runs three of its own cafes — the cafe managers are staff, not external customers. The owners plan to open up to seven sites over five years. Before the system:
 
-- Orders arrived by **phone and text** — easy to mishear, easy to lose.
+- Orders arrived by **phone, e-mails and text** — easy to mishear, easy to lose.
 - The roaster manually totalled all orders to decide how much to roast, converting roasted weight back to **green bean weight** (beans lose ~14–18% during roasting, and the rate differs per origin).
 - Cafes phoned to ask "is my order in?", interrupting production.
 - A late add-on order meant either a **second drum run** (expensive) or manual recalculation of an existing plan.
