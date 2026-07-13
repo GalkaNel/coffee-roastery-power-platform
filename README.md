@@ -51,23 +51,9 @@ A small Auckland roastery supplies three own cafes and plans exspand in the near
 ---
 
 ## Architecture
+![Architecture](docs/Architecture.png)
 
-```
-┌──────────────────┐    orders     ┌───────────────┐   16:00 schedule /    ┌────────────────────┐
-│  Cafe Order App  │ ────────────► │   DATAVERSE   │   on-demand button    │   Power Automate   │
-│  (Canvas)        │               │   7 tables    │ ◄───────────────────► │  1 child flow +    │
-│  per cafe manager│               │   roles+teams │   reads Submitted     │  2 entry points    │
-└──────────────────┘               │               │   writes Batches,     └────────────────────┘
-                                   │               │   Tasks, merges
-┌──────────────────┐   daily ops   │               │
-│ Packing Station  │ ◄───────────► │               │
-│ (Canvas)         │               └───────────────┘
-│ roaster dashboard│                       ▲
-│ + packing flow   │                       │ admin · audit · analytics
-└──────────────────┘               ┌───────────────┐
-                                   │ Roastery Ops  │
-                                   │ (Model-driven)│
-                                   └───────────────┘
+
 ```
 
 **Tool choice is per scenario, not per system.** Canvas where the scenario is a purpose-built flow with no standard-UI equivalent (the order matrix; the tap-driven packing checklist). Model-driven where the need is records management — grids, forms, charts, Excel export, all generated from metadata at near-zero cost. A hybrid is the mature answer, not a compromise.
