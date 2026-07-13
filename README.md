@@ -54,26 +54,14 @@ A small Auckland roastery supplies three own cafes and plans exspand in the near
 ![Architecture](docs/Architecture.png)
 
 
-```
 
 **Tool choice is per scenario, not per system.** Canvas where the scenario is a purpose-built flow with no standard-UI equivalent (the order matrix; the tap-driven packing checklist). Model-driven where the need is records management — grids, forms, charts, Excel export, all generated from metadata at near-zero cost. A hybrid is the mature answer, not a compromise.
 
 ---
 
 ## Data model
+![Data model](docs/Data model.png)
 
-```
- Coffee Blend ──1:N (Restrict)──► Roast Batch ──1:N (Parental)──► Packaging Task
-  (origin,                         (batch #, roast level,          (grind, size,
-   shrinkage %)                     ordered kg, green kg,           bag count)
-        │                           roast date, batch status)
-        │
-        │ 1:N (via SKU)
-        ▼
- Product SKU ◄──N:1 (Restrict)── Stock Order Line ──N:1 (Parental)── Stock Order ──N:1── Cafe
-  (blend+roast+grind+size,         (quantity,                        (order #, status,   (name,
-   composite alternate key)         pack status)                      production date)    owner team)
-```
 
 | Decision | Rationale |
 |---|---|
