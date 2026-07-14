@@ -7,7 +7,11 @@ A complete order-to-production system for a small coffee roastery supplying thre
 Built end-to-end as a portfolio project: data model, security, automation, three applications, and the design decisions behind them.
 
 ---
+---
 
+📊 **[Business case](docs/business-case.md)** — the same project for a non-technical reader: what the market offers and what it costs (Cropster, RoastLog, Cin7, Unleashed), where the off-the-shelf options fall short, a five-year cost comparison, and an honest section on where a custom build is the wrong answer.
+
+---
 ## Table of contents
 
 - [The business problem](#the-business-problem)
