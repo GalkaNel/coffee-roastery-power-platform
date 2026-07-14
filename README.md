@@ -9,7 +9,7 @@ Built end-to-end as a portfolio project: data model, security, automation, three
 ---
 ---
 
-📊 **[Business case](docs/business-case.md)** — the same project for a non-technical reader: what the market offers and what it costs (Cropster, RoastLog, Cin7, Unleashed), where the off-the-shelf options fall short, a five-year cost comparison, and an honest section on where a custom build is the wrong answer.
+📊 **[Business case](docs/coffee-roastery-business-case.md)** — the same project for a non-technical reader: what the market offers and what it costs (Cropster, RoastLog, Cin7, Unleashed), where the off-the-shelf options fall short, a five-year cost comparison, and an honest section on where a custom build is the wrong answer.
 
 ---
 ## Table of contents
