@@ -208,8 +208,11 @@ What model-driven contributes, and why it earns its place:
 - **Charts**: *Ordered Kg by Blend*, *Bags by Package Size* — click-to-filter. (Demo data demonstrates the system's **capability to measure**, not market conclusions.)
 - **Customised main form** on Roast Batch + a **Business Rule**: `IF Batch Status = Done THEN Ordered Kg is Business Required` — declarative form logic, no code.
 
-![Cafe orders for Roastery](docs/modelDr.png)
-!(docs/1_MD_ST_Or.png)(docs/2_MD_RB.png)(docs/DataModel.png)(docs/DataModel.png)
+![Roastery Ops](docs/modelDr.png)
+![Roastery Ops](docs/1_MD_ST_Or.png)
+![Roastery Ops](docs/2_MD_RB.png)
+![Roastery Ops](docs/3_MD_PT1.png)
+![Roastery Ops](docs/4_MD_PT2.png)
 
 ---
 
