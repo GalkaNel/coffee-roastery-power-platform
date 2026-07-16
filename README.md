@@ -170,6 +170,8 @@ For each blend|roast key:
 
 ## Applications
 
+**[App showcase](docs/docs/Roastery_app_showcase.mp4)** 
+
 ### Cafe Order App (canvas — cafe managers)
 
 - **Order matrix**: SKU gallery with quantity inputs; quantities held in a collection (patch-on-change); submit filters `Qty > 0`.
