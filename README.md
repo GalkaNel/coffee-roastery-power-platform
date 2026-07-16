@@ -170,7 +170,11 @@ For each blend|roast key:
 
 ## Applications
 
-**[App showcase](docs/docs/Roastery_app_showcase.mp4)** 
+## Demo video
+
+[![Watch the demo](docs/video-thumbnail.png)](https://youtu.be/m7cRZf3rfo8)
+
+*1,5 -minute walkthrough: placing an order, building the production plan, and packing.*
 
 ### Cafe Order App (canvas — cafe managers)
 
