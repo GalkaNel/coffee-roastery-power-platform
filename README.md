@@ -172,7 +172,7 @@ For each blend|roast key:
 
 ## Demo video
 
-[![Watch the demo](docs/Roastery App Showcase _ Microsoft Power Apps Canvas App - YouTube.png)](https://youtu.be/m7cRZf3rfo8)
+![Watch the demo](docs/Roastery App Showcase _ Microsoft Power Apps Canvas App - YouTube.png)(https://youtu.be/m7cRZf3rfo8)
 
 *1,5 -minute walkthrough: placing an order, building the production plan, and packing.*
 
