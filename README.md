@@ -202,7 +202,15 @@ For each blend|roast key:
 - **Timer-based polling** keeps the always-open tablet dashboard fresh (canvas has no server push).
 
 ![Cafe orders for Roastery](docs/RoasterApp.png)
+![Cafe orders for Roastery](docs/Roastery_1_Home_Screen_orders_roast_packs.png)
 ![Cafe orders for Roastery](docs/CoffeRP.png)
+![Cafe orders for Roastery](docs/Roastery_2_Closing_Intake_manualy.png)
+![Cafe orders for Roastery](docs/Roastery_4_going_to_pack_orders.png)
+![Cafe orders for Roastery](docs/Roastery_5_checking_orders.png)
+![Cafe orders for Roastery](docs/Roastery_6_Finishing_checking_orders.png)
+![Cafe orders for Roastery](docs/Roastery_6_Finishing_checking_orders_2.png)
+![Cafe orders for Roastery](docs/Roastery_7_work_done.png)
+![Cafe orders for Roastery](docs/Roastery_7_work_done_new_order.png)
 
 ### Roastery Ops (model-driven — roaster + office)
 
