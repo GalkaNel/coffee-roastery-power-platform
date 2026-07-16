@@ -187,6 +187,9 @@ For each blend|roast key:
 
 ![Cafe managers order](docs/OrderSteps.png)
 ![Cafe managers order](docs/Cafe_Order_1_Home_Screen.png)
+![Cafe managers order](docs/Cafe_Order_3_Review_Screen.png)
+![Cafe managers order](docs/Cafe_Order_2_Confirm_Screen.png)
+![Cafe managers order](docs/Cafe_Order_4_History_Screen.png)
 
 
 ### Packing Station (canvas — roaster)
