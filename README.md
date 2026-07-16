@@ -186,6 +186,8 @@ For each blend|roast key:
 - Live clock beside the cutoff rule, with a state-aware note that switches after 16:00 from *rule* to *fact about this order*.
 
 ![Cafe managers order](docs/OrderSteps.png)
+![Cafe managers order](docs/Cafe_Order_1_Home_Screen.png)
+
 
 ### Packing Station (canvas — roaster)
 
