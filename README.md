@@ -209,7 +209,7 @@ What model-driven contributes, and why it earns its place:
 - **Customised main form** on Roast Batch + a **Business Rule**: `IF Batch Status = Done THEN Ordered Kg is Business Required` — declarative form logic, no code.
 
 ![Cafe orders for Roastery](docs/modelDr.png)
-
+!(docs/1_MD_ST_Or.png)(docs/2_MD_RB.png)(docs/DataModel.png)(docs/DataModel.png)
 
 ---
 
