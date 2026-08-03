@@ -44,19 +44,12 @@ I designed and built the solution end to end:
 * [Security](docs/security.md) — Dataverse roles, Owner Teams and café-level isolation.
 * [Production readiness](docs/production-readiness.md) — limitations, environment adaptations and licensing.
 
----
-
-
-📊 **[Business case](docs/coffee-roastery-business-case.md)** — the same project for a non-technical reader: what the market offers and what it costs (Cropster, RoastLog, Cin7, Unleashed), where the off-the-shelf options fall short, a five-year cost comparison, and an honest section on where a custom build is the wrong answer.
-
----
 
 ## Table of contents
 
 - [The business problem](#the-business-problem)
-- [What the system does](#what-the-system-does)
+- [How the solution works](#how-the-solution-works)
 - [Architecture](#architecture)
-- [Technical documentation](#technical-documentation)
 - [Applications](#applications)
 - [Key design decisions](#key-design-decisions)
 - [Repository contents](#repository-contents)
@@ -90,7 +83,6 @@ The system performs this calculation automatically after consolidating demand fr
 ---
 
 
-
 ## How the solution works
 
 ### 1. A café places an order
@@ -119,21 +111,12 @@ A late order is merged into an existing production task while that task is still
 
 ---
 
----
-
 ## Architecture
 ![Architecture](docs/Architecture.png)
 
 For the complete architecture, Dataverse data model and design rationale, see the [technical design](docs/technical-design.md).
 
 **Tool choice is per scenario, not per system.** Canvas where the scenario is a purpose-built flow with no standard-UI equivalent (the order matrix; the tap-driven packing checklist). Model-driven where the need is records management — grids, forms, charts, Excel export, all generated from metadata at near-zero cost. A hybrid is the mature answer, not a compromise.
-
----
-
-## Data model
-
-![DM](docs/DataModel.png)
-
 
 ---
 ## Technical documentation
@@ -143,13 +126,7 @@ For the complete architecture, Dataverse data model and design rationale, see th
 - [Security](docs/security.md) — Dataverse roles, Owner Teams and café-level isolation.
 - [Production readiness](docs/production-readiness.md) — limitations, environment adaptations and licensing.
   
-## Applications
 
-## Demo video
-
-[![Watch the demo](docs/YouTube.png)](https://youtu.be/m7cRZf3rfo8)
-
-*1,5 -minute walkthrough: placing an order, building the production plan, and packing.*
 
 ### Cafe Order App (canvas — cafe managers)
 
@@ -222,17 +199,20 @@ Additional implementation details are documented in the [technical design](docs/
 
 
 ---
-
 ## Repository contents
-
-```
-├── README.md                     ← this file
+```text
+├── README.md
 ├── solution/
-│   ├── CoffeeRoastery_*.zip           unmanaged (source)
-│   └── CoffeeRoastery_*_managed.zip   managed (deployable)
+│   ├── CoffeeRoastery_*.zip
+│   └── CoffeeRoastery_*_managed.zip
 └── docs/
-    └── screenshots & diagrams
+    ├── technical-design.md
+    ├── automation.md
+    ├── security.md
+    ├── production-readiness.md
+    └── coffee-roastery-business-case.md
 ```
+
 
 **To deploy:** import the managed solution into a Dataverse environment, then configure connection references (Dataverse), assign the two security roles, and create Owner Teams per cafe.
 
