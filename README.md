@@ -11,19 +11,15 @@ Built end-to-end as a portfolio project: data model, security, automation, three
 📊 **[Business case](docs/coffee-roastery-business-case.md)** — the same project for a non-technical reader: what the market offers and what it costs (Cropster, RoastLog, Cin7, Unleashed), where the off-the-shelf options fall short, a five-year cost comparison, and an honest section on where a custom build is the wrong answer.
 
 ---
+
 ## Table of contents
 
 - [The business problem](#the-business-problem)
 - [What the system does](#what-the-system-does)
 - [Architecture](#architecture)
-- [Data model](#data-model)
-- [Security model](#security-model)
-- [Automation](#automation)
+- [Technical documentation](#technical-documentation)
 - [Applications](#applications)
 - [Key design decisions](#key-design-decisions)
-- [Environment adaptations](#environment-adaptations)
-- [Known limitations & production path](#known-limitations--production-path)
-- [Licensing considerations](#licensing-considerations)
 - [Repository contents](#repository-contents)
 
 ---
@@ -66,7 +62,7 @@ Green coffee loses **11–24% of its weight** during roasting (moisture, chaff, 
 ## Architecture
 ![Architecture](docs/Architecture.png)
 
-
+For the complete architecture, Dataverse data model and design rationale, see the [technical design](docs/technical-design.md).
 
 **Tool choice is per scenario, not per system.** Canvas where the scenario is a purpose-built flow with no standard-UI equivalent (the order matrix; the tap-driven packing checklist). Model-driven where the need is records management — grids, forms, charts, Excel export, all generated from metadata at near-zero cost. A hybrid is the mature answer, not a compromise.
 
@@ -77,96 +73,14 @@ Green coffee loses **11–24% of its weight** during roasting (moisture, chaff, 
 ![DM](docs/DataModel.png)
 
 
-| Decision | Rationale |
-|---|---|
-| Custom tables instead of Dynamics Product Catalog / Account | No pricing or billing in scope; sales entities would drag price lists and units into a production domain and obscure the business language ("Cafe", "Stock Order"). Documented revisit trigger: franchise billing. |
-| **Alternate keys** on all reference tables | Deterministic upserts; duplicate prevention at platform level rather than duplicate-detection jobs. |
-| **Composite alternate key + composite primary name** on Product SKU | One SKU per real-world combination; the primary name renders a complete human-readable line ("Ethiopia Yirgacheffe - Light - Filter - 500 g") everywhere for free. |
-| **Parental** cascade Order→Lines, Batch→Tasks; **Restrict** Lines→SKU, Batch→Blend | Deleting a whole removes its parts; deleting a referenced catalog item is blocked. Product retirement = Deactivate, never delete. |
-| Shrinkage % stored **per blend** | `green = ordered ÷ (1 − shrinkage/100)`. Shrinkage is a property of the bean, so it lives on the origin. |
-| **No batch↔order relationship** | A batch aggregates lines from *many* orders (M:N by nature). Order-level traceability lives where the relationship is direct — the packing screen. A junction table was evaluated and rejected: no business question required it. |
-
-
 ---
+## Technical documentation
 
-## Security model
-
-Two independent layers:
-
-**1. Data layer — security roles + Owner Teams**
-
-| Role | Access |
-|---|---|
-| `Cafe User` | CRUD on Stock Order / Order Line at **User (Basic)** level with team inheritance; Read on catalog; **no access** to production tables. Each cafe's orders are owned by that cafe's **Owner Team** → managers see only their own cafe (verified by test). |
-| `Roaster` | Create/Read/Write **Organization** on Roast Batch & Packaging Task (**no Delete** — production history is never deleted); Read on orders; Read+Write on Order Lines (packing ticks); **Write on Stock Order** scoped to the process need (closing a box) — Create/Delete deliberately not granted. |
-
-**2. Application layer — app-to-role assignment.** Roastery Ops is shared only to `Roaster`. App access narrows the surface but is **not** the security boundary — row-level security holds even if an app link leaks.
-
-**Cafe identity is derived from login, never selected by the user.**
-
-*Least privilege as a living contract: every new writing gesture in the UI triggers a role review, tested under the end user's account — not the maker's.*
-Row-level isolation is enforced by security roles and Owner Teams, not by app-side filters — the history gallery deliberately queries the table without a cafe filter. Verified under end-user accounts: a cafe manager sees only their own cafe's orders. (A System Administrator sees all rows by design — security must always be tested under the end user, never under the maker.)
-
----
-
-## Automation
-
-![Autom](docs/Automation.png)
-
-
-All logic lives in the child flow; the two parents are thin entry points — one implementation, multiple doors. A third door (e.g. an agent) could be added without touching logic.
-
-### Child flow, step by step
-
-1. **TodayNZ** — `convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time')`. All date logic is local-calendar based.
-2. **List Submitted orders** with `Production Date ≤ TodayNZ`. Orders submitted after the 16:00 cutoff carry the *next business day* (cutoff + weekend skip, set by the order app), so a same-day run naturally ignores them — an explicit business rule: *after 16:00 the drum is running; add-ons roll to the next day*.
-3. **List Order Lines** with **Expand Query** to reach Blend and its shrinkage in a single call (no N+1 lookups).
-4. **Select** an 11-field flat card per line; everything downstream works from this projection.
-5. **Batch grouping** — distinct `blend|roastLevel` keys via the classic `union(x, x)` de-dup; per key: Filter Array → **xpath sum** of kg → *merge-or-create*.
-6. **Packaging grouping** — distinct `blend|roast|grind|size` keys; per key: bag-count sum → **Find Batch** → create Packaging Task.
-7. **Mark Orders In Production** — the idempotency mechanism: a repeated run finds zero Submitted orders and exits in ~0.5 s.
-8. **Respond** — `"Roast groups processed: N, packaging tasks: M"` (counts distinct groups — honest wording whether batches were created or merged).
-
-### Merge logic — batch-level deduplication
-
-**Problem found in acceptance testing:** two build waves in one day (early close + scheduled run), or an unroasted leftover from a previous day, produced duplicate batches for the same blend+roast — two drum runs where one suffices. The core value of the automation was leaking.
-
-**Two valid business rules collided:**
-- *Never touch a batch that is already roasting* (physics — beans are in the drum).
-- *One blend+roast should be one drum run* (the point of the automation).
-
-**Resolution — the boundary is the physical status:**
-
-```
-For each blend|roast key:
-    Find Planned Batch = List rows (Roast Batches)
-                         filter: blend AND roastLevel AND statuscode = Planned   ← no date filter
-                         sort:   createdon DESC, row count 1
-    IF found:
-        Update row: Ordered Kg = existing + new
-                    Green Kg   = (existing + new) ÷ (1 − shrinkage/100)
-        → packaging tasks attach to this batch
-    ELSE:
-        Add row (create a new batch)
-```
-
-- **No date filter** — a Planned leftover from *any* previous day is a valid merge target; yesterday's tail absorbs today's demand.
-- **Planned only** — Roasting/Done batches are invisible to the merge. Verified: setting a batch to Roasting forced creation of a separate batch.
-- **`createdon desc`, row count 1** in the packaging lookup — tasks always land on the newest live batch of the key (just created or just merged). This one-line sort also fixed a real defect: with two same-key batches in a day, tasks previously attached to the wrong one.
-- **Merge by Update, never delete-and-recreate** — recreation would cascade-delete existing Packaging Tasks (Parental).
-
-![Cafe orders Flow merge](docs/flow-merge2.png)
-
-### Idempotency, layered honestly
-
-| Layer | Mechanism | Coverage |
-|---|---|---|
-| Order level | Status flip to *In Production* as the final step | Any repeated **successful** run processes nothing twice (empty rerun ≈ 500 ms) |
-| Batch level | Merge into Planned (above) | Two waves a day / leftover tails never duplicate a drum run |
-| **Gap (documented)** | Mark Orders is the last step → a run failing **mid-way** leaves orders Submitted with artifacts already created; a rerun duplicates them | Probability low, detection immediate, cleanup cheap. **Production path:** artifact-level existence checks before each Add row, or a claim-first pattern (flip status first, compensate on failure) |
-
----
-
+- [Technical design](docs/technical-design.md) — architecture, data model and design decisions.
+- [Automation](docs/automation.md) — flow structure, grouping, merge logic and idempotency.
+- [Security](docs/security.md) — Dataverse roles, Owner Teams and café-level isolation.
+- [Production readiness](docs/production-readiness.md) — limitations, environment adaptations and licensing.
+  
 ## Applications
 
 ## Demo video
@@ -242,45 +156,8 @@ What model-driven contributes, and why it earns its place:
 10. **KPIs framed as measurement capability**, never fabricated outcomes.
 
 ---
+Additional implementation details are documented in the [technical design](docs/technical-design.md). 
 
-## Environment adaptations
-
-Documented as adaptations, not hacks — each with a production path.
-
-| Constraint | Adaptation | Production path |
-|---|---|---|
-| Choice sets not resolvable in one canvas app (`Value()` conversion failed; `Text() = "label"` comparisons unreliable for writes) | **Status dictionary in OnStart**: capture real choice values positionally over `Choices('Table'.'Column')`; value order frozen as a contract; display via `Text()`, all comparisons/writes via dictionary variables | Delegable direct choice comparison, or a numeric status-code column |
-| Date-only columns arrive in canvas as **DateTime at noon** — `= Today()` misses | `Date(Year(d), Month(d), Day(d)) = Today()` in canvas; `convertTimeZone` in flows — one disease, two cures on both sides of the data | Consistent TZ policy per column |
-| Non-delegable predicates (label comparisons, date reconstruction, CountRows on full tables) | Accepted at demo scale; reference data snapshotted to collections at start; transactional data always queried live | Delegable predicates; indexed status columns |
-| No Teams/Exchange licences in the developer tenant | In-app surfacing (worklist tails, result stamp) carries the safety load | Teams adaptive cards / email on the same triggers |
-| Canvas has no server push | Timer-based polling on always-open screens | Power Apps push notifications; model-driven auto-refresh |
-
----
-
-## Known limitations & production path
-
-- **Mid-run failure idempotency** (see the table above) — the one real gap, with a stated fix.
-- **Mixed read-comparison legacy** — early screens use label comparisons, later ones the choice dictionary. It works; consistency would be a refactor.
-- **Status reversal** — a roasted batch can only be reopened via the model-driven form (admin path), deliberately not from the operator's tap.
-- **Notification channels** — the system surfaces exceptions in the operator's worklist rather than pushing alerts; Teams/email would be added in production.
-
----
-### Domain simplifications (deliberate, with a stated next iteration)
-
-- **Shrinkage is stored per coffee, not per coffee × roast level.** In reality, weight loss depends on both the bean's moisture content *and* the roast degree — the same origin roasted dark loses more than roasted light. *Next iteration: move the shrinkage percentage onto the blend × roast-level combination — a data-model change, not an architectural one.*
-- **Machine capacity is not modelled.** A production task of 35 kg of green is not one machine load — a small roastery's machine typically takes 5–15 kg at a time, so the task becomes several sequential loads. The system plans *what and how much*, not *how many loads*. *Next iteration: add machine capacity as reference data and split tasks into loads automatically, which also unlocks realistic time estimates for the roasting day.*
-- **Terminology note:** a `Roast Batch` record is a **production task** (one coffee × roast level for the day), not a single physical machine load. Merging tasks saves a **changeover** — profile setup, weighing, dialling in — which is the production-planning value the automation delivers.
-
----
-
-## Licensing considerations
-
-Built on the **Power Apps Developer Plan** (Dataverse included, single-maker environment). A production deployment would need:
-
-- **Per-app or per-user Power Apps licences** for cafe managers and the roaster (three cafes + one operator makes per-app licensing the cheaper path at this scale).
-- **Power Automate** — the daily flow runs under Power Platform request limits; the scheduled run is one execution per day, well within a standard entitlement.
-- **Dataverse capacity** — the data volume here (orders, batches, tasks) is trivial; base capacity suffices.
-- Alternatives evaluated: **Power Pages** for external cafes (external-user licensing) vs. **guest access to a canvas app** — for three known cafes with named managers, canvas + per-app licensing is materially cheaper; Power Pages becomes the answer at 20+ cafes or anonymous ordering.
 
 ---
 
