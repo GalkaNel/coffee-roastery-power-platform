@@ -129,7 +129,7 @@ For the complete architecture, Dataverse data model and design rationale, see th
 ## Applications
 
 ### Cafe Order App (canvas — cafe managers)
- ![Cafe managers order](docs/OrderSteps.png)
+![Cafe managers order](docs/OrderSteps.png)
 - **Order matrix**: SKU gallery with quantity inputs; quantities held in a collection (patch-on-change); submit filters `Qty > 0`.
 - **Zero-trap fix**: inputs default to empty with a "0" hint and echo the stored value back (`If(ThisItem.Qty > 0, Text(ThisItem.Qty), "")`) — the "typed 2, ordered 20" cursor trap is impossible.
 ![Cafe managers order](docs/Cafe_Order_1_Home_Screen.png)
@@ -150,7 +150,8 @@ For the complete architecture, Dataverse data model and design rationale, see th
 ### Packing Station (canvas — roaster)
 ![Cafe orders for Roastery](docs/RoasterApp.png)
 - **State-aware dashboard**: status line switches between *intake open · submitted: N* / *no orders yet* / *plan built*; the cafe checklist dims when the day is built and quiet; the build result is stamped — *"Plan built 12 Jul, 18:39 — Roast groups processed: 1, packaging tasks: 6"*.
- ![Cafe orders for Roastery](docs/Roastery_1_Home_Screen_orders_roast_packs.png)
+![Cafe orders for Roastery](docs/Roastery_1_Home_Screen_orders_roast_packs.png)
+![Cafe orders for Roastery](docs/Roastery_7_work_done_new_order.png)
 - **The roast plan is the worklist**: today's batches **plus unfinished batches from previous days**, which surface at the top with a ⚠ date badge. **Exception handling is merged into the daily worklist** — no separate alert zone, no "check the exceptions view" procedure. Same card, same gestures; a closed tail disappears by itself. (A dedicated red zone and a warning banner were both prototyped and rejected: *"what is the operator supposed to do with a notification?"* — the worklist answers that by construction.)
 ![Cafe orders for Roastery](docs/Roastery_1_Home_Screen_orders_roast_packs.png)
 - **Gesture separation** (UX rule formalised during the build): *navigation and transaction never share a hit target*. Tapping a row selects it (shows its packaging plan); the status transaction lives on a dedicated target — the "ROASTED ?" caption + circle, which answers itself on tap ("ROASTED ✔").
@@ -159,15 +160,16 @@ For the complete architecture, Dataverse data model and design rationale, see th
 - **Packing screen**: queue = orders *In Production* (date-independent); one order per screen; quantity-first line layout ("3 × Ethiopia…"); **tap-per-line** writes Pack Status; progress "Packed X of Y"; **Box ready** appears only at 100%, closes the order and auto-advances; finale "All boxes packed ☕".
 ![Cafe orders for Roastery](docs/Roastery_4_going_to_pack_orders.png)
 ![Cafe orders for Roastery](docs/Roastery_5_checking_orders.png)
+![Cafe orders for Roastery](docs/Roastery_6_Finishing_checking_orders.png)
+![Cafe orders for Roastery](docs/Roastery_6_Finishing_checking_orders_2.png)
 - **Timer-based polling** keeps the always-open tablet dashboard fresh (canvas has no server push).
 
-![Cafe orders for Roastery](docs/Roastery_7_work_done_new_order.png)
+
 
 ![Cafe orders for Roastery](docs/CoffeRP.png)
 
 
-![Cafe orders for Roastery](docs/Roastery_6_Finishing_checking_orders.png)
-![Cafe orders for Roastery](docs/Roastery_6_Finishing_checking_orders_2.png)
+
 ![Cafe orders for Roastery](docs/Roastery_7_work_done.png)
 
 
