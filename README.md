@@ -1,12 +1,61 @@
-# Coffee Roastery — Order & Production Management System
+# Coffee Roastery Operations System
 
-**Microsoft Power Platform** · Dataverse · Canvas Apps · Model-driven App · Power Automate · Power Fx
+**Microsoft Power Platform · Dataverse · Canvas Apps · Model-driven App · Power Automate**
 
-A complete order-to-production system for a small coffee roastery supplying three cafes: cafe managers place stock orders, the system builds the daily roasting and packaging plan automatically (including green-bean shrinkage math and cross-cafe aggregation), and the roaster works from a single operator dashboard through to packed boxes.
+A Power Platform solution that converts stock orders from three cafés into a consolidated daily roasting and packing plan.
+
+The system gives café managers one place to order stock and gives the roaster a single operational worklist—from green-bean calculations through to completed boxes.
+
+> **Portfolio project:** designed and built end to end, including business analysis, Dataverse architecture, security, automation, applications and production-readiness assessment.
+
+## At a glance
+
+| Business context                                     | Solution                                                |
+| ---------------------------------------------------- | ------------------------------------------------------- |
+| Three cafés supplied by one roastery                 | One shared Dataverse data platform                      |
+| Orders received through email, chat and spreadsheets | A dedicated ordering application for café managers      |
+| Production quantities calculated manually            | Automated aggregation and green-bean calculations       |
+| Late orders could create duplicate production setups | Planned work absorbs new demand until roasting begins   |
+| Unfinished work could be overlooked                  | Incomplete tasks remain in the operator's worklist      |
+| Packing relied on manual checks                      | An order cannot be completed until every line is packed |
+
+## What I delivered
+
+I designed and built the solution end to end:
+
+* translated the operating process into requirements and business rules;
+* designed the Dataverse schema, relationships and security model;
+* built two Canvas Apps and one model-driven application;
+* created scheduled and manually triggered Power Automate flows;
+* implemented café-level data isolation using security roles and Owner Teams;
+* tested operational exceptions, repeated flow runs and late-order scenarios;
+* evaluated licensing, build-vs-buy options and the path to production.
+
+## Demo
+
+**1.5-minute walkthrough:** placing an order, building the production plan and packing completed café orders.
+
+[Watch the video demonstration](PASTE-YOUR-YOUTUBE-LINK-HERE)
+
+## Explore the project
+
+* [Business case](docs/coffee-roastery-business-case.md) — commercial context, build-vs-buy analysis and cost comparison.
+* [Technical design](docs/technical-design.md) — architecture, data model and design decisions.
+* [Automation](docs/automation.md) — grouping, merge logic and idempotency.
+* [Security](docs/security.md) — Dataverse roles, Owner Teams and café-level isolation.
+* [Production readiness](docs/production-readiness.md) — limitations, environment adaptations and licensing.
+
+## Contents
+
+* [The business problem](#the-business-problem)
+* [How the solution works](#how-the-solution-works)
+* [Architecture](#architecture)
+* [Applications](#applications)
+* [Key design decisions](#key-design-decisions)
+* [Repository contents](#repository-contents)
 
 ---
-Built end-to-end as a portfolio project: data model, security, automation, three applications, and the design decisions behind them.
----
+
 
 📊 **[Business case](docs/coffee-roastery-business-case.md)** — the same project for a non-technical reader: what the market offers and what it costs (Cropster, RoastLog, Cin7, Unleashed), where the off-the-shelf options fall short, a five-year cost comparison, and an honest section on where a custom build is the wrong answer.
 
