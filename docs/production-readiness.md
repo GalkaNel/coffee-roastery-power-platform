@@ -1,50 +1,182 @@
 # Production Readiness
 
-This document records the current environment adaptations, known limitations, licensing considerations and the path from portfolio solution to production deployment.
+This document separates the current portfolio implementation from the work required for a reliable production deployment.
+
+The solution is functional as a demonstration environment, but several design choices were shaped by developer-tenant constraints and small data volumes. Those choices are documented here together with their production path.
 
 ## Contents
 
-- [Environment adaptations](#environment-adaptations)
-- [Known limitations](#known-limitations--production-path)
-- [Licensing considerations](#licensing-considerations)
+* [Current environment](#current-environment)
+* [Environment adaptations](#environment-adaptations)
+* [Known limitations](#known-limitations)
+* [Domain simplifications](#domain-simplifications)
+* [Production hardening](#production-hardening)
+* [Licensing considerations](#licensing-considerations)
+
+## Current environment
+
+The solution was built in a Power Apps Developer Plan environment with Dataverse.
+
+The current implementation assumes:
+
+* three company-owned cafés;
+* named café managers rather than anonymous or public users;
+* one primary roastery operator;
+* relatively small transactional data volumes;
+* no Teams or Exchange integration in the development tenant;
+* portfolio demonstration rather than live commercial operation.
+
+These assumptions explain several implementation choices but do not change the overall architecture.
+
 ## Environment adaptations
 
-Documented as adaptations, not hacks — each with a production path.
+The following adaptations were made deliberately and each has a defined production path.
 
-| Constraint | Adaptation | Production path |
-|---|---|---|
-| Choice sets not resolvable in one canvas app (`Value()` conversion failed; `Text() = "label"` comparisons unreliable for writes) | **Status dictionary in OnStart**: capture real choice values positionally over `Choices('Table'.'Column')`; value order frozen as a contract; display via `Text()`, all comparisons/writes via dictionary variables | Delegable direct choice comparison, or a numeric status-code column |
-| Date-only columns arrive in canvas as **DateTime at noon** — `= Today()` misses | `Date(Year(d), Month(d), Day(d)) = Today()` in canvas; `convertTimeZone` in flows — one disease, two cures on both sides of the data | Consistent TZ policy per column |
-| Non-delegable predicates (label comparisons, date reconstruction, CountRows on full tables) | Accepted at demo scale; reference data snapshotted to collections at start; transactional data always queried live | Delegable predicates; indexed status columns |
-| No Teams/Exchange licences in the developer tenant | In-app surfacing (worklist tails, result stamp) carries the safety load | Teams adaptive cards / email on the same triggers |
-| Canvas has no server push | Timer-based polling on always-open screens | Power Apps push notifications; model-driven auto-refresh |
+| Constraint                                                                                                                 | Current adaptation                                                                                                                                                           | Production path                                                                                                                                                           |
+| -------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Choice values were not resolved reliably in one Canvas App. Label comparisons also proved unsafe for write operations.     | A status dictionary is initialised in `OnStart` using the actual values returned by `Choices()`. Displays use labels, while comparisons and writes use stored choice values. | Standardise direct choice comparisons and remove positional assumptions. A numeric status-code column could also be introduced where reporting or delegation requires it. |
+| Date-only Dataverse columns arrive in Canvas Apps as DateTime values. Direct comparison with `Today()` can therefore fail. | Canvas formulas reconstruct the date using `Date(Year(d), Month(d), Day(d))`. Power Automate converts UTC to New Zealand time before applying business-date rules.           | Define and document a consistent timezone policy for every date and datetime column.                                                                                      |
+| Some predicates are non-delegable, including reconstructed dates, label comparisons and full-table row counts.             | Reference data is loaded into collections at application start. Transactional records are queried live and the approach is accepted at demonstration scale.                  | Replace remaining non-delegable predicates, use indexed fields and test against expected production volumes.                                                              |
+| The developer tenant does not include Teams or Exchange licences.                                                          | Exceptions remain visible inside the operator's normal worklist and flow results are shown inside the application.                                                           | Add Teams adaptive cards or email notifications using the same operational triggers.                                                                                      |
+| Canvas Apps do not receive server-push updates.                                                                            | Always-open operational screens use timer-based polling.                                                                                                                     | Evaluate push notifications, shorter targeted refreshes or model-driven auto-refresh depending on the final operating environment.                                        |
 
----
+## Known limitations
 
-## Known limitations & production path
+### Mid-run failure recovery
 
-- **Mid-run failure idempotency** (see the table above) — the one real gap, with a stated fix.
-- **Mixed read-comparison legacy** — early screens use label comparisons, later ones the choice dictionary. It works; consistency would be a refactor.
-- **Status reversal** — a roasted batch can only be reopened via the model-driven form (admin path), deliberately not from the operator's tap.
-- **Notification channels** — the system surfaces exceptions in the operator's worklist rather than pushing alerts; Teams/email would be added in production.
+Orders are changed to `In Production` only after production artifacts have been created.
 
----
-### Domain simplifications (deliberate, with a stated next iteration)
+If a flow fails partway through, some Roast Batches or Packaging Tasks may exist while the source orders remain `Submitted`. A rerun could therefore create duplicates.
 
-- **Shrinkage is stored per coffee, not per coffee × roast level.** In reality, weight loss depends on both the bean's moisture content *and* the roast degree — the same origin roasted dark loses more than roasted light. *Next iteration: move the shrinkage percentage onto the blend × roast-level combination — a data-model change, not an architectural one.*
-- **Machine capacity is not modelled.** A production task of 35 kg of green is not one machine load — a small roastery's machine typically takes 5–15 kg at a time, so the task becomes several sequential loads. The system plans *what and how much*, not *how many loads*. *Next iteration: add machine capacity as reference data and split tasks into loads automatically, which also unlocks realistic time estimates for the roasting day.*
-- **Terminology note:** a `Roast Batch` record is a **production task** (one coffee × roast level for the day), not a single physical machine load. Merging tasks saves a **changeover** — profile setup, weighing, dialling in — which is the production-planning value the automation delivers.
+The current implementation documents this risk rather than claiming full transactional idempotency.
 
----
+A production version should use artifact-level existence checks, claim-first processing or a processing-run identifier.
+
+### Mixed status-comparison patterns
+
+Earlier screens use some label-based status comparisons, while later screens use the status dictionary.
+
+Both approaches currently work, but production code should use one consistent pattern throughout.
+
+### Limited status reversal
+
+A completed roasting task cannot be reopened through the operator's primary tap-based interface.
+
+Reversal is available only through the model-driven administrative path. This reduces accidental changes but should be supported by a documented correction procedure and audit history.
+
+### In-application notifications only
+
+The current solution surfaces overdue and unfinished work inside the normal operational worklist.
+
+It does not yet send Teams, email or mobile push notifications.
+
+## Domain simplifications
+
+### Shrinkage is stored per coffee
+
+The current model stores one expected shrinkage percentage per coffee or blend.
+
+In real production, weight loss also depends on roast level. The same coffee roasted dark generally loses more weight than when roasted light.
+
+**Next iteration:** move shrinkage to the coffee-and-roast-level combination.
+
+This is a data-model refinement rather than an architectural redesign.
+
+### Machine capacity is not modelled
+
+A production task represents the total required quantity for one coffee and roast level.
+
+It does not split that quantity into individual physical machine loads.
+
+For example, a task requiring 35 kg of green coffee may require several sequential roaster loads depending on machine capacity.
+
+**Next iteration:** store machine capacity as reference data and automatically split production tasks into loads.
+
+This would also support more realistic daily time estimates.
+
+### `Roast Batch` means production task
+
+In the current Dataverse schema, a `Roast Batch` record represents consolidated production demand for one coffee and roast level.
+
+It does not necessarily represent one physical drum load.
+
+The term is retained in the solution, but `Production Task` would be clearer in a future schema revision.
+
+## Production hardening
+
+Before live deployment, the following work should be completed:
+
+### Automation reliability
+
+* prevent concurrent scheduled and manual runs from processing the same orders;
+* introduce run-level traceability;
+* add duplicate detection before creating production artifacts;
+* define recovery and compensation behaviour for failed runs;
+* add structured error handling and operator-visible failure messages.
+
+### Application quality
+
+* standardise status comparisons across all screens;
+* replace remaining non-delegable formulas;
+* test with realistic production data volumes;
+* test tablet, desktop and mobile layouts;
+* document the correction path for mistakenly completed work.
+
+### Security and governance
+
+* validate every security role using end-user accounts;
+* document café-team onboarding and offboarding;
+* enable auditing for important status changes;
+* use separate development, test and production environments;
+* introduce environment variables and managed deployment practices;
+* review data-retention and backup requirements.
+
+### Operational readiness
+
+* agree who owns reference data;
+* define support and incident procedures;
+* establish monitoring for failed flows;
+* document daily cutoff exceptions;
+* train café managers and roastery staff;
+* confirm the meaning of production statuses with real operators.
 
 ## Licensing considerations
 
-Built on the **Power Apps Developer Plan** (Dataverse included, single-maker environment). A production deployment would need:
+The portfolio solution was built using the Power Apps Developer Plan.
 
-- **Per-app or per-user Power Apps licences** for cafe managers and the roaster (three cafes + one operator makes per-app licensing the cheaper path at this scale).
-- **Power Automate** — the daily flow runs under Power Platform request limits; the scheduled run is one execution per day, well within a standard entitlement.
-- **Dataverse capacity** — the data volume here (orders, batches, tasks) is trivial; base capacity suffices.
-- Alternatives evaluated: **Power Pages** for external cafes (external-user licensing) vs. **guest access to a canvas app** — for three known cafes with named managers, canvas + per-app licensing is materially cheaper; Power Pages becomes the answer at 20+ cafes or anonymous ordering.
+A production deployment would require appropriate licensing for Dataverse-backed applications and automation.
 
----
+### Likely small-scale option
 
+For three cafés and one roastery operator, per-app licensing may be more economical than broad per-user licensing, depending on the applications each person needs to access.
+
+The final choice should be confirmed against current Microsoft licensing terms before deployment.
+
+### Power Automate
+
+The scheduled automation runs once per business day, with occasional manual execution.
+
+The volume is small, but production planning should still consider:
+
+* connector entitlements;
+* Power Platform request limits;
+* flow ownership;
+* service accounts;
+* premium connector requirements;
+* support when the owning user leaves the organisation.
+
+### Dataverse capacity
+
+Order, production and packaging records are relatively small.
+
+Base Dataverse capacity is likely to be sufficient at the initial scale, but actual usage should be monitored as the number of cafés and historical records grows.
+
+### External-user alternatives
+
+The current design assumes named internal or guest users accessing a Canvas App.
+
+Power Pages may become more appropriate if the company expands to many independently operated cafés, requires anonymous ordering or needs a public-facing portal.
+
+The decision should be based on user identity, scale, security and current licensing costs rather than a fixed café-count threshold.
+
+> Licensing changes frequently. All production estimates must be validated against Microsoft's current licensing documentation before purchase.
