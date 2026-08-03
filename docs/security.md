@@ -1,20 +1,59 @@
-## Security model
-This document describes how café-level data isolation and application access are enforced in Dataverse.
+# Security Model
 
+This document explains how the solution restricts café data, assigns application access and applies least-privilege permissions in Dataverse.
 
+## Security principles
 
-Two independent layers:
+The design uses two independent layers:
 
-**1. Data layer — security roles + Owner Teams**
+1. **Dataverse security** controls which records and operations a user can access.
+2. **Application sharing** controls which application interfaces are available to each role.
 
-| Role | Access |
-|---|---|
-| `Cafe User` | CRUD on Stock Order / Order Line at **User (Basic)** level with team inheritance; Read on catalog; **no access** to production tables. Each cafe's orders are owned by that cafe's **Owner Team** → managers see only their own cafe (verified by test). |
-| `Roaster` | Create/Read/Write **Organization** on Roast Batch & Packaging Task (**no Delete** — production history is never deleted); Read on orders; Read+Write on Order Lines (packing ticks); **Write on Stock Order** scoped to the process need (closing a box) — Create/Delete deliberately not granted. |
+Application access narrows the visible surface, but it is not treated as the security boundary.
 
-**2. Application layer — app-to-role assignment.** Roastery Ops is shared only to `Roaster`. App access narrows the surface but is **not** the security boundary — row-level security holds even if an app link leaks.
+## Café-level data isolation
 
-**Cafe identity is derived from login, never selected by the user.**
+Each café has a dedicated Dataverse **Owner Team**.
 
-*Least privilege as a living contract: every new writing gesture in the UI triggers a role review, tested under the end user's account — not the maker's.*
-Row-level isolation is enforced by security roles and Owner Teams, not by app-side filters — the history gallery deliberately queries the table without a cafe filter. Verified under end-user accounts: a cafe manager sees only their own cafe's orders. (A System Administrator sees all rows by design — security must always be tested under the end user, never under the maker.)
+Stock Orders and Order Lines are owned by the corresponding café team. Café managers inherit access through their team membership and therefore see only records belonging to their own café.
+
+The café is derived from the signed-in user and is never selected manually in the application.
+
+Row-level isolation was tested under café-manager accounts. A System Administrator can see all records by design, so security validation must always be performed using the intended end-user role rather than the maker account.
+
+## Security roles
+
+| Role        | Dataverse access                                                                                                                                                                                                                                                                       |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cafe User` | Create, read, update and delete Stock Orders and Order Lines at User-level scope with team inheritance; read access to product and café reference data; no access to production tables.                                                                                                |
+| `Roaster`   | Organization-level create, read and update access to Roast Batches and Packaging Tasks; no delete access to production history; read access to Stock Orders; update access to Order Lines for packing confirmation; limited update access to Stock Orders for completing a packed box. |
+
+Delete access is deliberately withheld from the `Roaster` role because production history should not be removed through normal operations.
+
+## Application access
+
+* **Cafe Order App** is shared with users assigned the `Cafe User` role.
+* **Packing Station** is shared with the roaster.
+* **Roastery Ops** is shared only with the `Roaster` role.
+
+Even if an application link is shared accidentally, Dataverse permissions continue to restrict the underlying records.
+
+## Least privilege
+
+Permissions are tied to specific user actions.
+
+Whenever the interface introduces a new write operation, the corresponding security role must be reviewed and retested under an end-user account.
+
+This keeps least privilege as an ongoing design constraint rather than a one-time configuration task.
+
+## Production considerations
+
+A production deployment should also include:
+
+* named team owners and a documented process for café-manager onboarding;
+* periodic review of team membership and security-role assignments;
+* auditing for status changes and other operationally important updates;
+* separate maker, test and production environments;
+* formal testing of every role after solution import.
+
+Related environment and deployment considerations are documented in [Production readiness](production-readiness.md).
