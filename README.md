@@ -4,9 +4,8 @@
 
 A complete order-to-production system for a small coffee roastery supplying three cafes: cafe managers place stock orders, the system builds the daily roasting and packaging plan automatically (including green-bean shrinkage math and cross-cafe aggregation), and the roaster works from a single operator dashboard through to packed boxes.
 
-Built end-to-end as a portfolio project: data model, security, automation, three applications, and the design decisions behind them.
-
 ---
+Built end-to-end as a portfolio project: data model, security, automation, three applications, and the design decisions behind them.
 ---
 
 📊 **[Business case](docs/coffee-roastery-business-case.md)** — the same project for a non-technical reader: what the market offers and what it costs (Cropster, RoastLog, Cin7, Unleashed), where the off-the-shelf options fall short, a five-year cost comparison, and an honest section on where a custom build is the wrong answer.
@@ -38,7 +37,7 @@ A small Auckland coffee company roasts its own beans and runs **three of its own
 - **No single source of truth**: orders arrived by email, group chat, and a shared spreadsheet nobody kept current — no reliable answer to "what exactly are we roasting today?"
 - A late add-on order meant either a **second production setup** for the same coffee — reset, re-profile, re-weigh — or a manual recalculation of an existing plan.
 - If a day went wrong (illness, equipment, a rush), unfinished work **silently disappeared** — the shortfall surfaced only when a cafe ran out, too late to roast, rest and deliver inside the freshness window.
-- 
+ 
 ### Why the business runs on short cycles
 
 Roasted coffee has a **peak-freshness window** — it is not "fresher is always better". Beans degas CO₂ for the first few days and brew unpredictably; most coffees peak around **days 5–14**; past ~30 days they oxidise and lose complexity. So the roastery cannot roast a month of stock in advance, and cannot roast tonight for tomorrow morning. It must work in **short repeating cycles**, with cafes ordering **frequently in small quantities**. That is a daily coordination load — and before this system, it was carried by hand.
