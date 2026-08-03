@@ -35,8 +35,7 @@ I designed and built the solution end to end:
 
 **1.5-minute walkthrough:** placing an order, building the production plan and packing completed café orders.
 
-[Watch the video demonstration](PASTE-YOUR-YOUTUBE-LINK-HERE)
-
+[Watch the video demonstration](https://youtu.be/m7cRZf3rfo8)
 ## Explore the project
 
 * [Business case](docs/coffee-roastery-business-case.md) — commercial context, build-vs-buy analysis and cost comparison.
@@ -44,15 +43,6 @@ I designed and built the solution end to end:
 * [Automation](docs/automation.md) — grouping, merge logic and idempotency.
 * [Security](docs/security.md) — Dataverse roles, Owner Teams and café-level isolation.
 * [Production readiness](docs/production-readiness.md) — limitations, environment adaptations and licensing.
-
-## Contents
-
-* [The business problem](#the-business-problem)
-* [How the solution works](#how-the-solution-works)
-* [Architecture](#architecture)
-* [Applications](#applications)
-* [Key design decisions](#key-design-decisions)
-* [Repository contents](#repository-contents)
 
 ---
 
@@ -72,39 +62,62 @@ I designed and built the solution end to end:
 - [Repository contents](#repository-contents)
 
 ---
-
 ## The business problem
-![The business problem](docs/Concept_issue.png)
-A small Auckland coffee company roasts its own beans and runs **three of its own cafes** — the cafe managers are staff, not external customers. The owners plan to open up to **seven sites over five years**. Before the system:
 
-- **Orders were scattered** across email, a group chat and a spreadsheet nobody maintained — read twice, or not at all.
-- The roaster manually totalled all orders to decide how much to roast, converting roasted weight back to **green bean weight** (beans lose ~14–18% during roasting, and the rate differs per origin).
-- **No single source of truth**: orders arrived by email, group chat, and a shared spreadsheet nobody kept current — no reliable answer to "what exactly are we roasting today?"
-- A late add-on order meant either a **second production setup** for the same coffee — reset, re-profile, re-weigh — or a manual recalculation of an existing plan.
-- If a day went wrong (illness, equipment, a rush), unfinished work **silently disappeared** — the shortfall surfaced only when a cafe ran out, too late to roast, rest and deliver inside the freshness window.
- 
-### Why the business runs on short cycles
+A small Auckland coffee company roasts coffee centrally for three company-owned cafés, with plans to grow to seven locations.
 
-Roasted coffee has a **peak-freshness window** — it is not "fresher is always better". Beans degas CO₂ for the first few days and brew unpredictably; most coffees peak around **days 5–14**; past ~30 days they oxidise and lose complexity. So the roastery cannot roast a month of stock in advance, and cannot roast tonight for tomorrow morning. It must work in **short repeating cycles**, with cafes ordering **frequently in small quantities**. That is a daily coordination load — and before this system, it was carried by hand.
+Before the solution:
 
-## The domain math
+* orders arrived through email, group chat and spreadsheets;
+* the roaster manually combined demand from every café;
+* ordered roasted weight had to be converted into the required green-bean weight;
+* late additions could cause duplicate production setups;
+* unfinished production work could disappear from the next day's plan;
+* packing depended on manual checking.
 
-Green coffee loses **11–24% of its weight** during roasting (moisture, chaff, off-gassing); lighter roasts lose less, darker more, and specialty roasters typically sit in the **11–16%** band. So the roaster cannot weigh out what was ordered: to deliver 30 kg roasted at 16% loss, they must load `30 ÷ (1 − 0.16) = 35.7 kg` of green. This backwards calculation — *how much green do I need for today's orders* — is a real daily manual task, and it is what the automation replaces.
+Coffee production also runs on short planning cycles. The roastery cannot simply produce a month of stock in advance, so ordering, roasting and delivery must be coordinated frequently.
 
-*(Roast-logging software also computes weight loss — but* ***after*** *the roast, from actual green-in/roasted-out weights, for quality control. Planning the green load* ***before*** *the roast, against a day of multi-site orders, is a different job.)*
+### Domain calculation
 
-## What the system does
+Coffee loses weight during roasting. To produce **30 kg of roasted coffee** at an expected **16% weight loss**, the system calculates:
 
-![Cafe managers order](docs/Concept_visuals2.png)
+```text
+Required green weight = 30 ÷ (1 − 0.16) = 35.7 kg
+```
 
-- Cafe managers order from **their own app** — a product grid on tablet/phone — and see their order history and live status.
-- At **16:00 daily** (or earlier, on one tap by the roaster) the system aggregates all orders, groups them into **roasting batches** by blend + roast level, computes green-bean weight per origin shrinkage, and generates the **grind & packaging plan** (bags per grind/size).
-- The roaster works from a single dashboard: who ordered, what to roast (in kg of green beans), how to grind and pack it. One tap marks a batch roasted.
-- Packing is guided: one order = one box, tap each line as it goes in, **"Box ready" only activates at 100%** — an incomplete box cannot ship. The screen auto-advances to the next box.
-- A late add-on order **merges into a production task that has not been run yet** — one setup instead of two. If the task has already started, the system respects physics and plans a separate one.
-- **Unfinished work from previous days cannot be forgotten**: it appears at the top of the daily worklist with a ⚠ date badge until closed.
+The system performs this calculation automatically after consolidating demand from all cafés.
+
+---
 
 
+
+## How the solution works
+
+### 1. A café places an order
+
+A café manager selects products and quantities in the Cafe Order App. The café is derived from the signed-in user and cannot be selected manually.
+
+### 2. Order intake is closed
+
+At 16:00—or earlier through a manual action—the system collects submitted orders that are ready for production.
+
+### 3. The production plan is generated
+
+Power Automate groups demand by coffee and roast level, calculates the required green-bean weight and creates the corresponding grinding and packaging tasks.
+
+### 4. The roaster completes the work
+
+The Packing Station presents today's production alongside unfinished work from previous days. Completed roasting tasks are confirmed individually.
+
+### 5. Café orders are packed
+
+Each order is treated as one box. The operator checks every order line, and the box can only be completed when all items have been packed.
+
+### Late-order handling
+
+A late order is merged into an existing production task while that task is still **Planned**. Once roasting has started, the system creates separate work rather than modifying a physical batch already in progress.
+
+---
 
 ---
 
