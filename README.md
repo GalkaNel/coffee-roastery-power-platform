@@ -119,13 +119,7 @@ For the complete architecture, Dataverse data model and design rationale, see th
 **Tool choice is per scenario, not per system.** Canvas where the scenario is a purpose-built flow with no standard-UI equivalent (the order matrix; the tap-driven packing checklist). Model-driven where the need is records management — grids, forms, charts, Excel export, all generated from metadata at near-zero cost. A hybrid is the mature answer, not a compromise.
 
 ---
-## Technical documentation
 
-- [Technical design](docs/technical-design.md) — architecture, data model and design decisions.
-- [Automation](docs/automation.md) — flow structure, grouping, merge logic and idempotency.
-- [Security](docs/security.md) — Dataverse roles, Owner Teams and café-level isolation.
-- [Production readiness](docs/production-readiness.md) — limitations, environment adaptations and licensing.
----  
 ## Applications
 
 **1.5-minute walkthrough:** placing an order, building the production plan and packing completed café orders.
