@@ -11,7 +11,7 @@ This document explains how Power Automate converts submitted café orders into r
 
 ## Flow structure
 
-![Autom](docs/Automation.png)
+![Autom](Automation.png)
 
 
 All logic lives in the child flow; the two parents are thin entry points — one implementation, multiple doors. A third door (e.g. an agent) could be added without touching logic.
@@ -55,7 +55,7 @@ For each blend|roast key:
 - **`createdon desc`, row count 1** in the packaging lookup — tasks always land on the newest live batch of the key (just created or just merged). This one-line sort also fixed a real defect: with two same-key batches in a day, tasks previously attached to the wrong one.
 - **Merge by Update, never delete-and-recreate** — recreation would cascade-delete existing Packaging Tasks (Parental).
 
-![Cafe orders Flow merge](docs/flow-merge2.png)
+![Cafe orders Flow merge](flow-merge2.png)
 
 ### Idempotency, layered honestly
 
