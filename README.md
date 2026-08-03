@@ -53,6 +53,7 @@ I designed and built the solution end to end:
 - [Applications](#applications)
 - [Key design decisions](#key-design-decisions)
 - [Repository contents](#repository-contents)
+- [Deployment](#deployment)
 
 ---
 ## The business problem
@@ -217,7 +218,18 @@ It remains in the roaster's normal worklist with a visible date warning until it
 ```
 
 
-**To deploy:** import the managed solution into a Dataverse environment, then configure connection references (Dataverse), assign the two security roles, and create Owner Teams per cafe.
+## Deployment
+
+1. Download the managed solution from the [`solution`](solution/) folder.
+2. Import it into a Dataverse environment.
+3. Configure the Dataverse connection references.
+4. Assign the `Cafe User` and `Roaster` security roles.
+5. Create one Owner Team for each café and add the corresponding café managers.
+6. Share the applications with the appropriate users and security roles.
+
+Environment-specific considerations are documented in [Production readiness](docs/production-readiness.md).
+
+
 
 ---
 
