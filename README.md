@@ -128,6 +128,10 @@ For the complete architecture, Dataverse data model and design rationale, see th
 ---  
 ## Applications
 
+**1.5-minute walkthrough:** placing an order, building the production plan and packing completed café orders.
+
+[Watch the video demonstration](https://youtu.be/m7cRZf3rfo8)
+
 ### Cafe Order App (canvas — cafe managers)
 ![Cafe managers order](docs/OrderSteps.png)
 - **Order matrix**: SKU gallery with quantity inputs; quantities held in a collection (patch-on-change); submit filters `Qty > 0`.
@@ -136,41 +140,23 @@ For the complete architecture, Dataverse data model and design rationale, see th
 - **Submit pipeline**: 16:00 cutoff + weekend skip computes Production Date; order created via Patch; **Owner reassigned to the cafe's team** (data isolation); lines created with `ForAll … As` + GUID lookups.
 - **Validation before action**: column-level constraints, submit disabled until valid — errors prevented, not caught.
 ![Cafe managers order](docs/Cafe_Order_3_Review_Screen.png)
-
-![Cafe managers order](docs/Cafe_Order_2_Confirm_Screen.png)
 - **My Orders** — master-detail history with live status (self-service status visibility; this is why a status chatbot was rejected as redundant).
 - Live clock beside the cutoff rule, with a state-aware note that switches after 16:00 from *rule* to *fact about this order*.
-
-
-
-
 ![Cafe managers order](docs/Cafe_Order_4_History_Screen.png)
 
+---
 
 ### Packing Station (canvas — roaster)
 ![Cafe orders for Roastery](docs/RoasterApp.png)
 - **State-aware dashboard**: status line switches between *intake open · submitted: N* / *no orders yet* / *plan built*; the cafe checklist dims when the day is built and quiet; the build result is stamped — *"Plan built 12 Jul, 18:39 — Roast groups processed: 1, packaging tasks: 6"*.
-![Cafe orders for Roastery](docs/Roastery_1_Home_Screen_orders_roast_packs.png)
-![Cafe orders for Roastery](docs/Roastery_7_work_done_new_order.png)
 - **The roast plan is the worklist**: today's batches **plus unfinished batches from previous days**, which surface at the top with a ⚠ date badge. **Exception handling is merged into the daily worklist** — no separate alert zone, no "check the exceptions view" procedure. Same card, same gestures; a closed tail disappears by itself. (A dedicated red zone and a warning banner were both prototyped and rejected: *"what is the operator supposed to do with a notification?"* — the worklist answers that by construction.)
-![Cafe orders for Roastery](docs/Roastery_1_Home_Screen_orders_roast_packs.png)
 - **Gesture separation** (UX rule formalised during the build): *navigation and transaction never share a hit target*. Tapping a row selects it (shows its packaging plan); the status transaction lives on a dedicated target — the "ROASTED ?" caption + circle, which answers itself on tap ("ROASTED ✔").
 - **Close intake & build plan** — visible only when Submitted > 0; confirmation overlay states the consequence; calls the wrapper flow and refreshes.
-  ![Cafe orders for Roastery](docs/Roastery_2_Closing_Intake_manualy.png)
 - **Packing screen**: queue = orders *In Production* (date-independent); one order per screen; quantity-first line layout ("3 × Ethiopia…"); **tap-per-line** writes Pack Status; progress "Packed X of Y"; **Box ready** appears only at 100%, closes the order and auto-advances; finale "All boxes packed ☕".
-![Cafe orders for Roastery](docs/Roastery_4_going_to_pack_orders.png)
-![Cafe orders for Roastery](docs/Roastery_5_checking_orders.png)
-![Cafe orders for Roastery](docs/Roastery_6_Finishing_checking_orders.png)
-![Cafe orders for Roastery](docs/Roastery_6_Finishing_checking_orders_2.png)
 - **Timer-based polling** keeps the always-open tablet dashboard fresh (canvas has no server push).
-
-
-
 ![Cafe orders for Roastery](docs/CoffeRP.png)
 
-
-
-![Cafe orders for Roastery](docs/Roastery_7_work_done.png)
+---
 
 
 ### Roastery Ops (model-driven — roaster + office)
