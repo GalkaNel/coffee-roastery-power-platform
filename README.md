@@ -57,6 +57,7 @@ I designed and built the solution end to end:
 
 ---
 ## The business problem
+![The business problem](docs/Concept_issue.png)
 
 A small Auckland coffee company roasts coffee centrally for three company-owned cafés, with plans to grow to seven locations.
 
