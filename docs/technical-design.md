@@ -1,3 +1,12 @@
+# Technical Design
+
+This document describes the architecture, data model and key design decisions behind the Coffee Roastery Operations System.
+
+## Contents
+
+- [Architecture](#architecture)
+- [Data model](#data-model)
+- [Key design decisions](#key-design-decisions)
 
 ## Architecture
 ![Architecture](docs/Architecture.png)
@@ -9,15 +18,6 @@
 
 ![DM](docs/DataModel.png)
 
-
-| Decision | Rationale |
-|---|---|
-| Custom tables instead of Dynamics Product Catalog / Account | No pricing or billing in scope; sales entities would drag price lists and units into a production domain and obscure the business language ("Cafe", "Stock Order"). Documented revisit trigger: franchise billing. |
-| **Alternate keys** on all reference tables | Deterministic upserts; duplicate prevention at platform level rather than duplicate-detection jobs. |
-| **Composite alternate key + composite primary name** on Product SKU | One SKU per real-world combination; the primary name renders a complete human-readable line ("Ethiopia Yirgacheffe - Light - Filter - 500 g") everywhere for free. |
-| **Parental** cascade Order→Lines, Batch→Tasks; **Restrict** Lines→SKU, Batch→Blend | Deleting a whole removes its parts; deleting a referenced catalog item is blocked. Product retirement = Deactivate, never delete. |
-| Shrinkage % stored **per blend** | `green = ordered ÷ (1 − shrinkage/100)`. Shrinkage is a property of the bean, so it lives on the origin. |
-| **No batch↔order relationship** | A batch aggregates lines from *many* orders (M:N by nature). Order-level traceability lives where the relationship is direct — the packing screen. A junction table was evaluated and rejected: no business question required it. |
 
 ---
 
@@ -36,16 +36,3 @@
 
 ---
 
-## Environment adaptations
-
-Documented as adaptations, not hacks — each with a production path.
-
-| Constraint | Adaptation | Production path |
-|---|---|---|
-| Choice sets not resolvable in one canvas app (`Value()` conversion failed; `Text() = "label"` comparisons unreliable for writes) | **Status dictionary in OnStart**: capture real choice values positionally over `Choices('Table'.'Column')`; value order frozen as a contract; display via `Text()`, all comparisons/writes via dictionary variables | Delegable direct choice comparison, or a numeric status-code column |
-| Date-only columns arrive in canvas as **DateTime at noon** — `= Today()` misses | `Date(Year(d), Month(d), Day(d)) = Today()` in canvas; `convertTimeZone` in flows — one disease, two cures on both sides of the data | Consistent TZ policy per column |
-| Non-delegable predicates (label comparisons, date reconstruction, CountRows on full tables) | Accepted at demo scale; reference data snapshotted to collections at start; transactional data always queried live | Delegable predicates; indexed status columns |
-| No Teams/Exchange licences in the developer tenant | In-app surfacing (worklist tails, result stamp) carries the safety load | Teams adaptive cards / email on the same triggers |
-| Canvas has no server push | Timer-based polling on always-open screens | Power Apps push notifications; model-driven auto-refresh |
-
----
