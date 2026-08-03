@@ -125,8 +125,8 @@ For the complete architecture, Dataverse data model and design rationale, see th
 - [Automation](docs/automation.md) — flow structure, grouping, merge logic and idempotency.
 - [Security](docs/security.md) — Dataverse roles, Owner Teams and café-level isolation.
 - [Production readiness](docs/production-readiness.md) — limitations, environment adaptations and licensing.
-  
-
+---  
+## Applications
 
 ### Cafe Order App (canvas — cafe managers)
  ![Cafe managers order](docs/OrderSteps.png)
@@ -148,24 +148,28 @@ For the complete architecture, Dataverse data model and design rationale, see th
 
 
 ### Packing Station (canvas — roaster)
-
+![Cafe orders for Roastery](docs/RoasterApp.png)
 - **State-aware dashboard**: status line switches between *intake open · submitted: N* / *no orders yet* / *plan built*; the cafe checklist dims when the day is built and quiet; the build result is stamped — *"Plan built 12 Jul, 18:39 — Roast groups processed: 1, packaging tasks: 6"*.
+ ![Cafe orders for Roastery](docs/Roastery_1_Home_Screen_orders_roast_packs.png)
 - **The roast plan is the worklist**: today's batches **plus unfinished batches from previous days**, which surface at the top with a ⚠ date badge. **Exception handling is merged into the daily worklist** — no separate alert zone, no "check the exceptions view" procedure. Same card, same gestures; a closed tail disappears by itself. (A dedicated red zone and a warning banner were both prototyped and rejected: *"what is the operator supposed to do with a notification?"* — the worklist answers that by construction.)
+![Cafe orders for Roastery](docs/Roastery_1_Home_Screen_orders_roast_packs.png)
 - **Gesture separation** (UX rule formalised during the build): *navigation and transaction never share a hit target*. Tapping a row selects it (shows its packaging plan); the status transaction lives on a dedicated target — the "ROASTED ?" caption + circle, which answers itself on tap ("ROASTED ✔").
 - **Close intake & build plan** — visible only when Submitted > 0; confirmation overlay states the consequence; calls the wrapper flow and refreshes.
+  ![Cafe orders for Roastery](docs/Roastery_2_Closing_Intake_manualy.png)
 - **Packing screen**: queue = orders *In Production* (date-independent); one order per screen; quantity-first line layout ("3 × Ethiopia…"); **tap-per-line** writes Pack Status; progress "Packed X of Y"; **Box ready** appears only at 100%, closes the order and auto-advances; finale "All boxes packed ☕".
-- **Timer-based polling** keeps the always-open tablet dashboard fresh (canvas has no server push).
-
-![Cafe orders for Roastery](docs/RoasterApp.png)
-![Cafe orders for Roastery](docs/Roastery_1_Home_Screen_orders_roast_packs.png)
-![Cafe orders for Roastery](docs/CoffeRP.png)
-![Cafe orders for Roastery](docs/Roastery_2_Closing_Intake_manualy.png)
 ![Cafe orders for Roastery](docs/Roastery_4_going_to_pack_orders.png)
 ![Cafe orders for Roastery](docs/Roastery_5_checking_orders.png)
+- **Timer-based polling** keeps the always-open tablet dashboard fresh (canvas has no server push).
+
+![Cafe orders for Roastery](docs/Roastery_7_work_done_new_order.png)
+
+![Cafe orders for Roastery](docs/CoffeRP.png)
+
+
 ![Cafe orders for Roastery](docs/Roastery_6_Finishing_checking_orders.png)
 ![Cafe orders for Roastery](docs/Roastery_6_Finishing_checking_orders_2.png)
 ![Cafe orders for Roastery](docs/Roastery_7_work_done.png)
-![Cafe orders for Roastery](docs/Roastery_7_work_done_new_order.png)
+
 
 ### Roastery Ops (model-driven — roaster + office)
 
