@@ -129,18 +129,21 @@ For the complete architecture, Dataverse data model and design rationale, see th
 
 
 ### Cafe Order App (canvas — cafe managers)
-
+ ![Cafe managers order](docs/OrderSteps.png)
 - **Order matrix**: SKU gallery with quantity inputs; quantities held in a collection (patch-on-change); submit filters `Qty > 0`.
 - **Zero-trap fix**: inputs default to empty with a "0" hint and echo the stored value back (`If(ThisItem.Qty > 0, Text(ThisItem.Qty), "")`) — the "typed 2, ordered 20" cursor trap is impossible.
+![Cafe managers order](docs/Cafe_Order_1_Home_Screen.png)
 - **Submit pipeline**: 16:00 cutoff + weekend skip computes Production Date; order created via Patch; **Owner reassigned to the cafe's team** (data isolation); lines created with `ForAll … As` + GUID lookups.
 - **Validation before action**: column-level constraints, submit disabled until valid — errors prevented, not caught.
+![Cafe managers order](docs/Cafe_Order_3_Review_Screen.png)
+
+![Cafe managers order](docs/Cafe_Order_2_Confirm_Screen.png)
 - **My Orders** — master-detail history with live status (self-service status visibility; this is why a status chatbot was rejected as redundant).
 - Live clock beside the cutoff rule, with a state-aware note that switches after 16:00 from *rule* to *fact about this order*.
 
-![Cafe managers order](docs/OrderSteps.png)
-![Cafe managers order](docs/Cafe_Order_1_Home_Screen.png)
-![Cafe managers order](docs/Cafe_Order_3_Review_Screen.png)
-![Cafe managers order](docs/Cafe_Order_2_Confirm_Screen.png)
+
+
+
 ![Cafe managers order](docs/Cafe_Order_4_History_Screen.png)
 
 
