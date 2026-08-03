@@ -1,67 +1,188 @@
 # Automation Design
 
-This document explains how Power Automate converts submitted café orders into roasting batches and packaging tasks.
+This document explains how Power Automate converts submitted café orders into consolidated roasting batches and packaging tasks.
 
 ## Contents
 
-- [Flow structure](#flow-structure)
-- [Child flow](#child-flow-step-by-step)
-- [Merge logic](#merge-logic--batch-level-deduplication)
-- [Idempotency](#idempotency-layered-honestly)
+* [Automation overview](#automation-overview)
+* [Flow structure](#flow-structure)
+* [Processing steps](#processing-steps)
+* [Merge logic](#merge-logic)
+* [Idempotency](#idempotency)
+* [Production improvements](#production-improvements)
+
+## Automation overview
+
+The automation has one shared processing flow and two entry points:
+
+* a scheduled flow that runs at the daily cutoff;
+* a manually triggered flow that allows the roaster to close intake early.
+
+Both parent flows call the same child flow. Business logic therefore exists in one place and does not need to be maintained separately for scheduled and manual execution.
+
+The child flow:
+
+1. finds submitted orders that are ready for production;
+2. retrieves and flattens their order lines;
+3. groups coffee demand into roasting tasks;
+4. groups package demand into packaging tasks;
+5. merges new demand into suitable planned work;
+6. marks the processed orders as `In Production`;
+7. returns a summary to the calling flow.
 
 ## Flow structure
 
-![Autom](Automation.png)
+![Power Automate flow structure](Automation.png)
 
+The parent flows act only as entry points. All transformation and production-planning logic remains in the child flow.
 
-All logic lives in the child flow; the two parents are thin entry points — one implementation, multiple doors. A third door (e.g. an agent) could be added without touching logic.
+This architecture also leaves room for another entry point—for example, an agent or an administrative action—without duplicating the underlying logic.
 
-### Child flow, step by step
+## Processing steps
 
-1. **TodayNZ** — `convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time')`. All date logic is local-calendar based.
-2. **List Submitted orders** with `Production Date ≤ TodayNZ`. Orders submitted after the 16:00 cutoff carry the *next business day* (cutoff + weekend skip, set by the order app), so a same-day run naturally ignores them — an explicit business rule: *after 16:00 the drum is running; add-ons roll to the next day*.
-3. **List Order Lines** with **Expand Query** to reach Blend and its shrinkage in a single call (no N+1 lookups).
-4. **Select** an 11-field flat card per line; everything downstream works from this projection.
-5. **Batch grouping** — distinct `blend|roastLevel` keys via the classic `union(x, x)` de-dup; per key: Filter Array → **xpath sum** of kg → *merge-or-create*.
-6. **Packaging grouping** — distinct `blend|roast|grind|size` keys; per key: bag-count sum → **Find Batch** → create Packaging Task.
-7. **Mark Orders In Production** — the idempotency mechanism: a repeated run finds zero Submitted orders and exits in ~0.5 s.
-8. **Respond** — `"Roast groups processed: N, packaging tasks: M"` (counts distinct groups — honest wording whether batches were created or merged).
+### 1. Resolve the local business date
 
-### Merge logic — batch-level deduplication
-
-**Problem found in acceptance testing:** two build waves in one day (early close + scheduled run), or an unroasted leftover from a previous day, produced duplicate batches for the same blend+roast — two drum runs where one suffices. The core value of the automation was leaking.
-
-**Two valid business rules collided:**
-- *Never touch a batch that is already roasting* (physics — beans are in the drum).
-- *One blend+roast should be one drum run* (the point of the automation).
-
-**Resolution — the boundary is the physical status:**
+The flow converts the current UTC time to New Zealand time:
 
 ```text
-For each blend|roast key:
-    Find Planned Batch = List rows (Roast Batches)
-                         filter: blend AND roastLevel AND statuscode = Planned   ← no date filter
-                         sort:   createdon DESC, row count 1
-    IF found:
-        Update row: Ordered Kg = existing + new
-                    Green Kg   = (existing + new) ÷ (1 − shrinkage/100)
-        → packaging tasks attach to this batch
-    ELSE:
-        Add row (create a new batch)
+convertTimeZone(utcNow(), 'UTC', 'New Zealand Standard Time')
 ```
 
-- **No date filter** — a Planned leftover from *any* previous day is a valid merge target; yesterday's tail absorbs today's demand.
-- **Planned only** — Roasting/Done batches are invisible to the merge. Verified: setting a batch to Roasting forced creation of a separate batch.
-- **`createdon desc`, row count 1** in the packaging lookup — tasks always land on the newest live batch of the key (just created or just merged). This one-line sort also fixed a real defect: with two same-key batches in a day, tasks previously attached to the wrong one.
-- **Merge by Update, never delete-and-recreate** — recreation would cascade-delete existing Packaging Tasks (Parental).
+All production-date rules are based on the local calendar rather than UTC.
 
-![Cafe orders Flow merge](flow-merge2.png)
+### 2. Retrieve eligible orders
 
-### Idempotency, layered honestly
+The flow retrieves submitted orders where:
 
-| Layer | Mechanism | Coverage |
-|---|---|---|
-| Order level | Status flip to *In Production* as the final step | Any repeated **successful** run processes nothing twice (empty rerun ≈ 500 ms) |
-| Batch level | Merge into Planned (above) | Two waves a day / leftover tails never duplicate a drum run |
-| **Gap (documented)** | Mark Orders is the last step → a run failing **mid-way** leaves orders Submitted with artifacts already created; a rerun duplicates them | Probability low, detection immediate, cleanup cheap. **Production path:** artifact-level existence checks before each Add row, or a claim-first pattern (flip status first, compensate on failure) |
+```text
+Production Date ≤ current New Zealand date
+```
 
+Orders placed after the 16:00 cutoff already carry the next eligible business date, calculated by the ordering application. The automation therefore excludes them naturally without duplicating the cutoff rule.
+
+### 3. Retrieve and flatten order lines
+
+Order Lines are retrieved with an Expand Query so the related coffee and shrinkage information is available in the same request.
+
+Each line is transformed into a flat working object containing the values required by the later grouping steps.
+
+This avoids repeated Dataverse lookups inside loops.
+
+### 4. Build roasting groups
+
+Demand is grouped by:
+
+```text
+Coffee or blend + roast level
+```
+
+For each distinct group, the flow:
+
+* totals the ordered roasted weight;
+* calculates the required green-bean weight;
+* finds an eligible planned production task;
+* updates that task or creates a new one.
+
+### 5. Build packaging groups
+
+Packaging demand is grouped by:
+
+```text
+Coffee or blend + roast level + grind + package size
+```
+
+The flow totals the required bag count and creates the corresponding Packaging Task against the correct production task.
+
+### 6. Complete order processing
+
+After production and packaging records have been created successfully, the source orders are changed from `Submitted` to `In Production`.
+
+The flow then returns a summary such as:
+
+```text
+Roast groups processed: N, packaging tasks: M
+```
+
+The wording refers to groups processed rather than records created because a production group may have been merged into an existing task.
+
+## Merge logic
+
+### Problem discovered during acceptance testing
+
+Two production-plan runs could occur on the same day:
+
+* the roaster closes intake manually;
+* the scheduled flow runs later.
+
+A planned leftover from a previous day could also already exist.
+
+Without merge logic, the system created two production tasks for the same coffee and roast level, even though one combined drum run would be sufficient.
+
+Two valid rules had to be respected:
+
+* work already being roasted must never be changed;
+* compatible demand should be consolidated into one production run.
+
+### Resolution
+
+The merge boundary follows the physical production status:
+
+```text
+For each coffee-and-roast group:
+
+    Find the newest production task where:
+        coffee matches
+        roast level matches
+        status is Planned
+
+    If a task exists:
+        add the new ordered weight to the existing weight
+        recalculate the required green-bean weight
+        attach new packaging tasks to this production task
+
+    Otherwise:
+        create a new production task
+```
+
+Important implementation choices:
+
+* **No production-date filter:** a planned leftover from an earlier day is still a valid merge target.
+* **Planned status only:** tasks already marked `Roasting` or `Done` are excluded.
+* **Newest suitable task:** sorting by creation date prevents packaging work from attaching to an older same-key task.
+* **Update rather than recreate:** deleting and rebuilding a production task could cascade-delete its existing packaging tasks.
+
+![Production-task merge logic](flow-merge2.png)
+
+## Idempotency
+
+The flow protects against duplicate processing at more than one level.
+
+| Layer                 | Mechanism                                                                      | Coverage                                                                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Order level           | Successfully processed orders are changed from `Submitted` to `In Production`. | A repeated successful run finds no eligible orders and exits without duplicating work.                                                           |
+| Production-task level | New demand merges into a compatible `Planned` task.                            | Multiple processing waves and unfinished work do not create unnecessary duplicate roasting tasks.                                                |
+| Known gap             | Orders are updated only after production artifacts are created.                | A failure midway through the flow could leave orders as `Submitted` while some artifacts already exist. A rerun could duplicate those artifacts. |
+
+The known gap is documented rather than hidden. In the portfolio implementation, the likelihood is low and the result is visible and inexpensive to correct.
+
+## Production improvements
+
+For a production deployment, the automation should be strengthened with one of these patterns:
+
+### Artifact-level existence checks
+
+Before creating each Roast Batch or Packaging Task, the flow checks whether an equivalent record already exists for the current processing run.
+
+### Claim-first processing
+
+Orders are moved into an intermediate processing status before artifact creation. If the flow fails, a compensation path resets or completes the affected records.
+
+### Concurrency control
+
+Parallel runs should be prevented or coordinated so that a scheduled and manually triggered execution cannot claim the same submitted orders simultaneously.
+
+### Run-level traceability
+
+A processing-run identifier should be stored against generated records. This would make troubleshooting, duplicate detection and recovery easier.
+
+These improvements are part of the production path rather than claims about the current portfolio implementation.
