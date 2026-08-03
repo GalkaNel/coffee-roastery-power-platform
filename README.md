@@ -178,19 +178,27 @@ Implementation details and notable Power Fx patterns are documented in the [tech
 
 ## Key design decisions
 
-1. **Custom domain tables over Dynamics sales entities** — with a documented revisit trigger (billing).
-2. **Tool per scenario; hybrid by design** — canvas for purpose-built flows, model-driven for records management.
-3. **Copilot Studio agent evaluated and rejected** — every candidate user's questions were already served by purpose-built UI (cafes have *My Orders*; the roaster has the dashboard), and external cafes had no viable channel. Adding an agent would duplicate surfaces. (The skill is demonstrated in a separate D365 Customer Service project, where an agent has a native home.)
-4. **Merge boundary = physics** — Planned batches absorb new demand; Roasting/Done are untouchable.
-5. **Exception surfacing in the worklist**, not in notifications or separate zones.
-6. **Per-batch tap confirmation over a bulk "close the day"** — bulk closure by date was designed, then rejected: it would blindly close a second wave nobody had roasted yet. Atomic facts beat batch ceremonies.
-7. **Business Process Flow evaluated and rejected** — the process is linear with no stage decisions; a BPF here is ceremony without value.
-8. **Security in data, not in app filters** — app-level filtering is UX; row-level security is the boundary.
-9. **Validation before action** across both apps — constraints → contracts → DisplayMode/Visible.
-10. **KPIs framed as measurement capability**, never fabricated outcomes.
+### 1. The merge boundary follows the physical process
 
----
-Additional implementation details are documented in the [technical design](docs/technical-design.md). 
+New demand can be added to a production task while its status is **Planned**.
+
+Once roasting has started, the system does not modify that task. A separate production task is created instead.
+
+This reduces duplicate setups without pretending that physical work already in progress can still be changed.
+
+### 2. Security is enforced in Dataverse
+
+Café-level data isolation is implemented through Dataverse security roles and Owner Teams—not through filters inside the Canvas App.
+
+The café is derived from the signed-in user and cannot be selected manually. This means that data access remains restricted even outside the application's normal screens.
+
+### 3. Exceptions remain in the normal workflow
+
+Unfinished production is not moved to a separate warning screen.
+
+It remains in the roaster's normal worklist with a visible date warning until it is completed. The operator does not need to monitor another dashboard or remember an additional process.
+
+[Read the complete technical rationale](docs/technical-design.md)
 
 
 ---
